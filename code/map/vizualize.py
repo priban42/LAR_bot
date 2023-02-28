@@ -12,5 +12,5 @@ canvas= tk.Canvas(gui,width=width, height=height)
 canvas.pack()
 
 map.draw_objects(canvas)
-
+print('bagr bagr')
 gui.mainloop()
