@@ -5,6 +5,7 @@ class Object(Entity):
     def __init__(self, position = np.array([-100, -100]), radius = 10):
         Entity.__init__(self, position)
         self.radius = radius
+        self.color = "orange"
     def set_radius(self, r):
         self.radius = r
     import math
@@ -18,6 +19,13 @@ class Object(Entity):
         cx = self.position[0]
         cy = self.position[1]
         r = self.radius
+
+        if (cx-x1)**2 + (cy-y1)**2 < r**2:
+            return True
+
+        if (cx-x2)**2 + (cy-y2)**2 < r**2:
+            return True
+
         dx = x2 - x1
         dy = y2 - y1
         a = dx ** 2 + dy ** 2
