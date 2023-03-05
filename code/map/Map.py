@@ -2,6 +2,7 @@ import numpy as np
 from Object import Object
 from Line_segment import Line_segment
 from Point import Point
+from dijkstar import Graph, find_path
 
 class Map:
     def __init__(self):
@@ -9,6 +10,7 @@ class Map:
         self.points = []
         self.line_segments = []
         self.centre = [450, 250]#offset pro vizualizaci (posule levy horni roh do stredu)
+        self.graph = Graph()
 
     def draw_object(self, canvas, object):
         canvas.create_oval(object.position[0] + self.centre[0] - object.radius,
@@ -31,8 +33,10 @@ class Map:
                            line_segment.A.position[1] + self.centre[1],
                            line_segment.B.position[0] + self.centre[0],
                            line_segment.B.position[1] + self.centre[1],
-                           fill=line_segment.color, width=5)
+                           fill=line_segment.color, width=2)
 
+    def find_path(self, A, B):
+        return find_path(self.graph, A, B)
 
     def draw(self, canvas):
         for object in self.objects:
@@ -47,13 +51,19 @@ class Map:
         new_object.set_position(x, y)
         new_object.set_radius(r)
         self.objects.append(new_object)
+        return object
 
-    def add_line_segment(self, point_start, point_end):
-        self.line_segments.append(Line_segment(point_start, point_end))
+    def add_line_segment(self, line_segment):
+        self.line_segments.append(line_segment)
+        self.graph.add_edge(line_segment.A, line_segment.B, line_segment.get_length())
 
-    def add_point(self, position = [-100, -100]):
+    def add_point_from_position(self, position = [-100, -100]):
         new_point = Point(position)
-        self.points.append(new_point)
+        self.add_point(new_point)
+        return new_point
+
+    def add_point(self, point):
+        self.points.append(point)
 
     def add_line_segment_from_positions(self, start, end):
         new_pointA = Point(start)
@@ -62,9 +72,19 @@ class Map:
         # v budoucnu vubec tento line segment nepridavat pokud neco protina
         if self.intersects_any(new_line_segment):
             new_line_segment.color = "red"
-        self.points.append(new_pointA)
-        self.points.append(new_pointB)
-        self.line_segments.append(new_line_segment)
+        self.add_point(new_pointA)
+        self.add_point(new_pointB)
+        self.add_line_segment(new_line_segment)
+        return new_line_segment
+        #self.points.append(new_pointA)
+        #self.points.append(new_pointB)
+        #self.line_segments.append(new_line_segment)
+
+    def add_line_segmetn_from_points(self, A, B):
+        new_line_segment = Line_segment(A, B)
+        if not self.intersects_any(new_line_segment):
+            self.add_line_segment(new_line_segment)
+            return new_line_segment
 
     def intersects_any(self, line_segment):
         for object in self.objects:
