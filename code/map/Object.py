@@ -19,7 +19,6 @@ class Object(Entity):
         cx = self.position[0]
         cy = self.position[1]
         r = self.radius
-
         if (cx-x1)**2 + (cy-y1)**2 < r**2:
             return True
 
