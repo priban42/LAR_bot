@@ -21,7 +21,7 @@ def take_pictures(msg):
     loc_time = time.localtime()
     year = loc_time.tm_year - 2000
     im_id = str(year) + "_" + str(loc_time.tm_yday) + "_" + str(loc_time.tm_hour) + "_" + str(
-        loc_time.tm_min) + "_" + str(loc_time.tm_sec)
+        loc_time.tm_min) + "_" + str(loc_time.tm_sec)+"bagr"
 
     rand = im_id
     turtle.wait_for_point_cloud()
