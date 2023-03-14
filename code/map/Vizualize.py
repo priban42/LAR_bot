@@ -8,30 +8,35 @@ import tkinter as tk
 import random
 import sys
 
+
 class Vizualize():
     def __init__(self):
         self._window = tk.Tk()
         self.width = 900
         self.height = 500
         self.scale = 100
-        self.grid_size = 1 #size of grid squares in meters
-        self.centre = [self.width/2, self.height/2]
+        self.grid_size = 1  # size of grid squares in meters
+        self.centre = [self.width / 2, self.height / 2]
         self._window.geometry(str(self.width) + "x" + str(self.height))
-        self.canvas= tk.Canvas(self._window,width=self.width, height=self.height)
+        self.canvas = tk.Canvas(self._window, width=self.width, height=self.height)
         self.canvas.pack()
-        #self._window.mainloop()
+        # self._window.mainloop()
         self.map = None
         self.robot = None
+
     def set_map(self, map):
         self.map = map
+
     def set_robot(self, robot):
         self.robot = robot
 
     def _center_view(self):
         if self.robot != None:
-            self.centre = [self.width/2 + self.robot.position[1]*self.scale, self.height/2 + self.robot.position[0]*self.scale]
+            self.centre = [self.width / 2 + self.robot.position[1] * self.scale,
+                           self.height / 2 + self.robot.position[0] * self.scale]
         else:
-            self.centre = [self.width/2, self.height/2]
+            self.centre = [self.width / 2, self.height / 2]
+
     def _draw_object(self, object: Object) -> None:
         """
         draws the object on canvas as a circle with a centre
@@ -39,39 +44,45 @@ class Vizualize():
         :param object:
         """
         self._center_view()
-        self.canvas.create_oval(object.position[0]*self.scale + self.centre[0] - object.radius*self.scale,
-                                  object.position[1]*self.scale + self.centre[1] - object.radius*self.scale,
-                                  object.position[0]*self.scale + self.centre[0] + object.radius*self.scale,
-                                  object.position[1]*self.scale + self.centre[1] + object.radius*self.scale, outline = object.color)
-        self.canvas.create_oval(object.position[0]*self.scale + self.centre[0] - 3,
-                                  object.position[1]*self.scale + self.centre[1] - 3,
-                                  object.position[0]*self.scale + self.centre[0] + 3,
-                                  object.position[1]*self.scale + self.centre[1] + 3, fill = object.color)
+        self.canvas.create_oval(object.position[0] * self.scale + self.centre[0] - object.radius * self.scale,
+                                object.position[1] * self.scale + self.centre[1] - object.radius * self.scale,
+                                object.position[0] * self.scale + self.centre[0] + object.radius * self.scale,
+                                object.position[1] * self.scale + self.centre[1] + object.radius * self.scale,
+                                outline=object.color)
+        self.canvas.create_oval(object.position[0] * self.scale + self.centre[0] - 3,
+                                object.position[1] * self.scale + self.centre[1] - 3,
+                                object.position[0] * self.scale + self.centre[0] + 3,
+                                object.position[1] * self.scale + self.centre[1] + 3, fill=object.color)
 
     def _draw_point(self, point):
         self._center_view()
-        self.canvas.create_oval(point.position[0]*self.scale + self.centre[0] - 3,
-                                  point.position[1]*self.scale + self.centre[1] - 3,
-                                  point.position[0]*self.scale + self.centre[0] + 3,
-                                  point.position[1]*self.scale + self.centre[1] + 3, fill = point.color)
+        self.canvas.create_oval(point.position[0] * self.scale + self.centre[0] - 3,
+                                point.position[1] * self.scale + self.centre[1] - 3,
+                                point.position[0] * self.scale + self.centre[0] + 3,
+                                point.position[1] * self.scale + self.centre[1] + 3, fill=point.color)
 
     def _draw_line_segment(self, line_segment):
         self._center_view()
-        self.canvas.create_line(line_segment.A.position[0]*self.scale + self.centre[0],
-                           line_segment.A.position[1]*self.scale + self.centre[1],
-                           line_segment.B.position[0]*self.scale + self.centre[0],
-                           line_segment.B.position[1]*self.scale + self.centre[1],
-                           fill=line_segment.color, width=2)
+        self.canvas.create_line(line_segment.A.position[0] * self.scale + self.centre[0],
+                                line_segment.A.position[1] * self.scale + self.centre[1],
+                                line_segment.B.position[0] * self.scale + self.centre[0],
+                                line_segment.B.position[1] * self.scale + self.centre[1],
+                                fill=line_segment.color, width=2)
 
     def _draw_grid(self):
         color = "light grey"
-        grid_density = 1/self.grid_size #lines per meter
-        for i in range(0, int(grid_density*self.width//(2*self.scale)) + 1):
-            self.canvas.create_line(self.width/2 + i*self.scale/grid_density, 0, self.width/2 + i*self.scale/grid_density, self.height, fill=color)
-            self.canvas.create_line(self.width/2 - i*self.scale/grid_density, 0, self.width/2 - i*self.scale/grid_density, self.height, fill=color)
-        for i in range(0, int(grid_density*self.height/(2*self.scale)) + 1):
-            self.canvas.create_line(0, self.height/2 + i*self.scale/grid_density, self.width, self.height/2 + i*self.scale/grid_density, fill=color)
-            self.canvas.create_line(0, self.height/2 - i*self.scale/grid_density, self.width, self.height/2 - i*self.scale/grid_density, fill=color)
+        grid_density = 1 / self.grid_size  # lines per meter
+        for i in range(0, int(grid_density * self.width // (2 * self.scale)) + 1):
+            self.canvas.create_line(self.width / 2 + i * self.scale / grid_density, 0,
+                                    self.width / 2 + i * self.scale / grid_density, self.height, fill=color)
+            self.canvas.create_line(self.width / 2 - i * self.scale / grid_density, 0,
+                                    self.width / 2 - i * self.scale / grid_density, self.height, fill=color)
+        for i in range(0, int(grid_density * self.height / (2 * self.scale)) + 1):
+            self.canvas.create_line(0, self.height / 2 + i * self.scale / grid_density, self.width,
+                                    self.height / 2 + i * self.scale / grid_density, fill=color)
+            self.canvas.create_line(0, self.height / 2 - i * self.scale / grid_density, self.width,
+                                    self.height / 2 - i * self.scale / grid_density, fill=color)
+
     def draw(self):
         self._draw_grid()
         for object in self.map.objects:
@@ -84,17 +95,29 @@ class Vizualize():
         self._window.mainloop()
         self._window.update()
 
+
 if __name__ == "__main__":
     gui = Vizualize()
     map = Map()
-    map.add_object(0, 0, 1)
-    #map.add_object(0, -100, 50)
+    map.add_object(0, 0, 0.1)
+    map.add_object(1, 0, 0.1)
+    map.add_object(0.5, 0.6, 0.1)
+    map.add_object(-0.5, -0.6, 0.1)
+    # map.add_object(0, -100, 50)
     po = []
-    for a in range(10):
-        pos = [random.randint(-2, 2), random.randint(-2, 2)]
-        po.append(map.add_point_from_position(pos))
-    for a in range(len(po)):
-        for b in range(a + 1, len(po)):
-            map.add_line_segmetn_from_points(po[a], po[b])
+    #for a in range(3):
+    #    pos = [random.randint(-2, 2), random.randint(-2, 2)]
+    #    po.append(map.add_point_from_position(pos))
+
+    #map.add_points_from_objects()
+    map.add_points_in_grid()
+    #map.add_points_from_objects()
+    map.add_all_possible_line_segments()
+    print("points:", len(map.points))
+    print("line_segments:", len(map.line_segments))
+    #for a in range(len(po)):
+    #    for b in range(a + 1, len(po)):
+    #        map.add_line_segment_from_points(po[a], po[b])
+
     gui.set_map(map)
     gui.draw()

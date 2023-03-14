@@ -2,13 +2,14 @@ import numpy as np
 from robolab_turtlebot import Turtlebot, Rate, get_time
 import math
 
+
 class Robot:
     def __init__(self):
         self._turtle = Turtlebot()
         self._rate = Rate(10)
         self.position = np.array([0, 0])
         self.direction = np.array([0, 1])
-        self._angular_velocity = 1.5# 1.5... *1.25
+        self._angular_velocity = 1.5  # 1.5... *1.25
         self._linear_velocity = 0.3
         self._turtle.register_bumper_event_cb(self._bumper)
         self.ACTIVE = True
@@ -25,17 +26,17 @@ class Robot:
         print("BUMPER PRESSED!")
         self.ACTIVE = False
 
-    def rotate_bot(self, angle: float) -> None:#deg
+    def rotate_bot(self, angle: float) -> None:  # deg
         """
         Physically rotates the turtle bot by an angle. Might not be very accurate.
         :param angle: in degrees
         """
         t = abs(angle) / self._angular_velocity * 1.24 * (2 * np.pi / 360)
         start = get_time()
-        speed = np.sign(angle)*self._angular_velocity
+        speed = np.sign(angle) * self._angular_velocity
         print(t, speed)
         while get_time() - start < t and self.ACTIVE:
-            self._turtle.cmd_velocity(angular = speed, linear = 0)
+            self._turtle.cmd_velocity(angular=speed, linear=0)
             self._rate.sleep()
 
     def move_bot(self, distance: float) -> None:
@@ -43,12 +44,12 @@ class Robot:
         Physically moves the turtle bot a certain distance. Might not be very accurate.
         :param distance: in meters
         """
-        t = abs(distance)/self._linear_velocity
+        t = abs(distance) / self._linear_velocity
         start = get_time()
-        speed = np.sign(distance)*self._linear_velocity
+        speed = np.sign(distance) * self._linear_velocity
         print(t, speed)
         while get_time() - start < t and self.ACTIVE:
-            self._turtle.cmd_velocity(linear = speed, angular = 0)
+            self._turtle.cmd_velocity(linear=speed, angular=0)
             self._rate.sleep()
 
     @staticmethod
@@ -76,7 +77,8 @@ class Robot:
         return norm
 
     @staticmethod
-    def _rotate_vector(vect: np.ndarray, angle: np.ndarray) -> np.ndarray:#angle in degrees, kladny uhel = proti smeru hod. rucicek
+    def _rotate_vector(vect: np.ndarray,
+                       angle: np.ndarray) -> np.ndarray:  # angle in degrees, kladny uhel = proti smeru hod. rucicek
         """
         Takes a vector and rotates it by angle.
         :param vect: any nonzero 2d vector
@@ -85,7 +87,7 @@ class Robot:
         """
         theta = np.deg2rad(-angle)
         rot = np.array([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]])
-        return(np.dot(rot, vect))
+        return (np.dot(rot, vect))
 
     def align_with_vector(self, vect: np.ndarray) -> None:
         """

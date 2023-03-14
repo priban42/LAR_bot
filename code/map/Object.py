@@ -1,17 +1,47 @@
 import numpy as np
 from Entity import Entity
 import math
+
+
 class Object(Entity):
-    def __init__(self, position = np.array([-100, -100]), radius = 10):
+    def __init__(self, position=np.array([-100, -100]), radius=10):
         Entity.__init__(self, position)
         self.radius = radius
         self.color = "orange"
+
+    def __eq__(self, other: 'Object') -> bool:
+        comparison = self.position == other.position
+        return comparison.all() and self.radius == other.radius
+
+    def __hash__(self):
+        return int(self.position[0] + 2*(10 ** 10) * self.position[1] + (10 ** 5)*self.radius)
+
     def set_radius(self, r):
         self.radius = r
+
     import math
 
+    def get_adjecent_points(self, object: 'Object') -> tuple:
+        """
+        generates 2 coordinates for points laying in between 2 objects.
+         the points lay on lines tanget to the obejct circle and have the same distance from both centres.
+        :param object:
+        :return:tuple of 2 positions
+        """
+        vect = (object.position - self.position)/2
+        radius = (self.radius + object.radius)/2
+        ortogonal_vect = np.array([-vect[1], vect[0]])
+        ortogonal_vect = (radius * ortogonal_vect)/np.linalg.norm(ortogonal_vect)
+        return self.position + vect + ortogonal_vect, self.position + vect - ortogonal_vect
+
+
     def line_segment_intersects_circle(self, line_segment):
-        # Calculate the distance between the center of the circle and the line segment
+        """
+        Calculates weather any point of line_segment lays in the object circle.
+        :param line_segment:
+        :return:
+        """
+        #
         x1 = line_segment.A.position[0]
         y1 = line_segment.A.position[1]
         x2 = line_segment.B.position[0]
@@ -19,10 +49,10 @@ class Object(Entity):
         cx = self.position[0]
         cy = self.position[1]
         r = self.radius
-        if (cx-x1)**2 + (cy-y1)**2 < r**2:
+        if (cx - x1) ** 2 + (cy - y1) ** 2 < r ** 2:
             return True
 
-        if (cx-x2)**2 + (cy-y2)**2 < r**2:
+        if (cx - x2) ** 2 + (cy - y2) ** 2 < r ** 2:
             return True
 
         dx = x2 - x1

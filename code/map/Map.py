@@ -5,13 +5,15 @@ from Point import Point
 from dijkstar import Graph, find_path
 import tkinter as tk
 
+
 class Map:
     def __init__(self):
-        self.objects = []
-        self.points = []
-        self.line_segments = []
-        self.centre = [450, 250]#offset pro vizualizaci (posule levy horni roh do stredu)
+        self.objects = set() # every object is unique. This set is only accessed direcly from self.add_object().
+        self.points = set() # every point is unique. This set is only accessed direcly from self.add_point().
+        self.line_segments = set() # every point is unique. This set is only accessed direcly from self.add_line_segment().
+        self.centre = [450, 250]  # offset pro vizualizaci (posule levy horni roh do stredu)
         self.graph = Graph()
+
     def find_path(self, A, B):
         return find_path(self.graph, A, B)
 
@@ -19,22 +21,58 @@ class Map:
         new_object = Object()
         new_object.set_position(x, y)
         new_object.set_radius(r)
-        self.objects.append(new_object)
+        self.objects.add(new_object)
         return object
 
     def add_line_segment(self, line_segment):
-        self.line_segments.append(line_segment)
+        self.line_segments.add(line_segment)
         self.graph.add_edge(line_segment.A, line_segment.B, line_segment.get_length())
 
-    def add_point_from_position(self, position):
+    def add_points_from_objects(self):
+        """
+        takes all objects in map and generates points accordingly.
+        (makes 2 points for each par of objects in between)
+        """
+        list_of_objects = list(self.objects)
+        for a in range(len(list_of_objects)):
+            for b in range(a + 1, len(list_of_objects)):
+                print(a, b)
+                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
+                self.add_point_from_position(position_a)
+                self.add_point_from_position(position_b)
+
+    def add_points_in_grid(self, centre = np.array([0, 0])):
+        size = 5 # in meters
+        density = 1# in points per meter
+        for x in range(int(size*density) + 1):
+            for y in range(int(size*density) + 1):
+                position =  np.array([(y/density) - size/2, (x/density) - size/2])
+                self.add_point_from_position(centre + position)
+
+    def add_point_from_position(self, position: np.array) -> Point:
+        """
+        Generates a new point from position and inserts it into map.
+        :param position: np.array([y, x])
+        :return:
+        """
         new_point = Point(position)
         self.add_point(new_point)
         return new_point
 
-    def add_point(self, point):
-        self.points.append(point)
+    def add_point(self, point: Point) -> None:
+        """
+        Adds a point to map.
+        :param point:
+        """
+        self.points.add(point)
 
-    def add_line_segment_from_positions(self, start, end):
+    def add_line_segment_from_positions(self, start: np.array, end: np.array) -> Line_segment:
+        """
+        Generates 2 new points from positions and a Line_segment between them.
+        :param start: np.array([y, x])
+        :param end:np.array([y, x])
+        :return:
+        """
         new_pointA = Point(start)
         new_pointB = Point(end)
         new_line_segment = Line_segment(new_pointA, new_pointB)
@@ -45,13 +83,35 @@ class Map:
             return new_line_segment
         return False
 
-    def add_line_segmetn_from_points(self, A, B):
+    def add_line_segment_from_points(self, A: Point, B: Point) -> Line_segment:
+        """
+        Generates a line segment from 2 points.
+        :param A:
+        :param B:
+        :return:
+        """
+        self.add_point(A)
+        self.add_point(B)
         new_line_segment = Line_segment(A, B)
         if not self.intersects_any(new_line_segment):
             self.add_line_segment(new_line_segment)
             return new_line_segment
 
-    def intersects_any(self, line_segment):
+    def add_all_possible_line_segments(self):
+        """
+        Generates a Line_segment for each pair of points (if possible).
+        """
+        points = list(self.points)
+        for a in range(len(points)):
+            for b in range(a + 1, len(points)):
+                self.add_line_segment_from_points(points[a], points[b])
+
+    def intersects_any(self, line_segment: Line_segment) -> bool:
+        """
+        Checks for each object on map weather it is intersected by 'line_segment'.
+        :param line_segment:
+        :return: False if no intersection occurs.
+        """
         for object in self.objects:
             if object.line_segment_intersects_circle(line_segment):
                 return True
