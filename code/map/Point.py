@@ -1,5 +1,5 @@
 import numpy as np
-from Entity import Entity
+from .Entity import Entity
 import math
 
 

@@ -1,9 +1,10 @@
 import numpy as np
-from Object import Object
-from Map import Map
-from Line_segment import Line_segment
-from Point import Point
-from dijkstar import Graph, find_path
+from .Object import Object
+from .Map import Map
+from .Line_segment import Line_segment
+from .Point import Point
+from .graph import Graph
+from .algorithm import find_path
 import tkinter as tk
 import random
 import sys
@@ -96,20 +97,4 @@ class Vizualize():
         self._window.update()
 
 
-if __name__ == "__main__":
-    gui = Vizualize()
-    map = Map()
-    map.add_object(0, 0, 0.1)
 
-    p1 = map.add_point_from_position([-4, 0])
-    p2 = map.add_point_from_position([0, 2])
-    p3 = map.add_point_from_position([4, 0])
-    map.add_all_possible_line_segments()
-    path = map.find_path(p1, p3)
-    print(path)
-    for n in path:
-        print (n.position)
-    print("points:", len(map.points))
-    print("line_segments:", len(map.line_segments))
-    gui.set_map(map)
-    gui.draw()

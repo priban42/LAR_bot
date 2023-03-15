@@ -1,9 +1,9 @@
 import numpy as np
-from Object import Object
-from Line_segment import Line_segment
-from Point import Point
-from dijkstar import Graph, find_path
-import tkinter as tk
+from .Object import Object
+from .Line_segment import Line_segment
+from .Point import Point
+from .graph import Graph
+from .algorithm import find_path
 
 
 class Map:
@@ -29,6 +29,7 @@ class Map:
     def add_line_segment(self, line_segment):
         self.line_segments.add(line_segment)
         self.graph.add_edge(line_segment.A, line_segment.B, line_segment.get_length())
+        self.graph.add_edge(line_segment.B, line_segment.A, line_segment.get_length())
 
     def add_points_from_objects(self):
         """
@@ -49,8 +50,8 @@ class Map:
         (End of the universe kind of long)
         :param centre:
         """
-        size = 4 # in meters
-        density = 0.5# in points per meter
+        size = 3 # in meters
+        density = 5# in points per meter
         for x in range(int(size*density) + 1):
             for y in range(int(size*density) + 1):
                 position =  np.array([(y/density) - size/2, (x/density) - size/2])

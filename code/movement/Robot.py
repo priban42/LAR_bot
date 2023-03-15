@@ -8,15 +8,15 @@ class Robot:
         self._turtle = Turtlebot()
         self._rate = Rate(10)
         self.position = np.array([0, 0])
-        self.direction = np.array([0, 1])
-        self._angular_velocity = 1.5  # 1.5... *1.25
+        self.direction = np.array([1, 0])
+        self._angular_velocity = 28.6  # 1.5... *1.25
         self._linear_velocity = 0.3
         self._turtle.register_bumper_event_cb(self._bumper)
         self.ACTIVE = True
         print("robot initialized...")
 
     def __str__(self):
-        return "position:", self.position, "direction:", self.direction, "ACTIVE:", self.ACTIVE
+        return "position:" + str(self.position) + "direction:" + str(self.direction) + "ACTIVE:" + str(self.ACTIVE)
 
     def _bumper(self, msg):
         """
@@ -31,13 +31,18 @@ class Robot:
         Physically rotates the turtle bot by an angle. Might not be very accurate.
         :param angle: in degrees
         """
-        t = abs(angle) / self._angular_velocity * 1.24 * (2 * np.pi / 360)
+
+        t = abs(angle) / self._angular_velocity
+        #t = (t + 1.0828/(self._angular_velocity * (2 * np.pi / 360)))/0.4871
         start = get_time()
-        speed = np.sign(angle) * self._angular_velocity
+        speed = -np.sign(angle) * self._angular_velocity
         print(t, speed)
         while get_time() - start < t and self.ACTIVE:
             self._turtle.cmd_velocity(angular=speed, linear=0)
             self._rate.sleep()
+        if not self.ACTIVE:
+            self._turtle.cmd_velocity(linear=0, angular=0)
+        self.direction = self._rotate_vector(self.direction, angle)
 
     def move_bot(self, distance: float) -> None:
         """
@@ -45,12 +50,16 @@ class Robot:
         :param distance: in meters
         """
         t = abs(distance) / self._linear_velocity
+        t = (t - 0.4603/self._linear_velocity)/0.9208
         start = get_time()
         speed = np.sign(distance) * self._linear_velocity
         print(t, speed)
         while get_time() - start < t and self.ACTIVE:
             self._turtle.cmd_velocity(linear=speed, angular=0)
             self._rate.sleep()
+        if not self.ACTIVE:
+            self._turtle.cmd_velocity(linear=0, angular=0)
+        self.position = self.position + self.direction*distance
 
     @staticmethod
     def _angle_between_vectors(vect1: np.ndarray, vect2: np.ndarray) -> float:  # in degrees
@@ -78,7 +87,7 @@ class Robot:
 
     @staticmethod
     def _rotate_vector(vect: np.ndarray,
-                       angle: np.ndarray) -> np.ndarray:  # angle in degrees, kladny uhel = proti smeru hod. rucicek
+                       angle: float) -> np.ndarray:  # angle in degrees, kladny uhel = proti smeru hod. rucicek
         """
         Takes a vector and rotates it by angle.
         :param vect: any nonzero 2d vector
@@ -98,5 +107,16 @@ class Robot:
         self.rotate_bot(angle)
         self.direction = self._normalize_vector(vect)
 
-    def move_to_position(self, position):
+
+    def move_to_position(self, point):
+        vect = point.position - self.position
+        distance = np.linalg.norm(vect)
+        self.align_with_vector(vect)
+        self.move_bot(distance)
+
+    def move_along_path(self, path):
+        for position in path:
+            self.move_to_position(position)
+
+    if __name__ == "__main__":
         pass
