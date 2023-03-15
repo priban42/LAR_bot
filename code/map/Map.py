@@ -9,13 +9,15 @@ import tkinter as tk
 class Map:
     def __init__(self):
         self.objects = set() # every object is unique. This set is only accessed direcly from self.add_object().
-        self.points = set() # every point is unique. This set is only accessed direcly from self.add_point().
+        self.points = dict() # every point is unique. This set is only accessed direcly from self.add_point().
         self.line_segments = set() # every point is unique. This set is only accessed direcly from self.add_line_segment().
+        self.path = []
         self.centre = [450, 250]  # offset pro vizualizaci (posule levy horni roh do stredu)
         self.graph = Graph()
 
     def find_path(self, A, B):
-        return find_path(self.graph, A, B)
+        self.path = find_path(self.graph, A, B).nodes
+        return self.path
 
     def add_object(self, x, y, r):
         new_object = Object()
@@ -41,9 +43,14 @@ class Map:
                 self.add_point_from_position(position_a)
                 self.add_point_from_position(position_b)
 
-    def add_points_in_grid(self, centre = np.array([0, 0])):
-        size = 5 # in meters
-        density = 1# in points per meter
+    def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
+        """
+        Generates points in a square with the centre in 'centre'. Too many points might result in way too long calculations when generating Line_segments.
+        (End of the universe kind of long)
+        :param centre:
+        """
+        size = 4 # in meters
+        density = 0.5# in points per meter
         for x in range(int(size*density) + 1):
             for y in range(int(size*density) + 1):
                 position =  np.array([(y/density) - size/2, (x/density) - size/2])
@@ -55,7 +62,10 @@ class Map:
         :param position: np.array([y, x])
         :return:
         """
+
         new_point = Point(position)
+        if new_point.__hash__() in self.points:
+            return self.points[new_point.__hash__()]
         self.add_point(new_point)
         return new_point
 
@@ -64,7 +74,7 @@ class Map:
         Adds a point to map.
         :param point:
         """
-        self.points.add(point)
+        self.points[point.__hash__()]= point
 
     def add_line_segment_from_positions(self, start: np.array, end: np.array) -> Line_segment:
         """
@@ -101,7 +111,7 @@ class Map:
         """
         Generates a Line_segment for each pair of points (if possible).
         """
-        points = list(self.points)
+        points = list(self.points.values())
         for a in range(len(points)):
             for b in range(a + 1, len(points)):
                 self.add_line_segment_from_points(points[a], points[b])

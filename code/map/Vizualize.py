@@ -89,7 +89,7 @@ class Vizualize():
             self._draw_object(object)
         for line_segment in self.map.line_segments:
             self._draw_line_segment(line_segment)
-        for point in self.map.points:
+        for point in self.map.points.values():
             self._draw_point(point)
 
         self._window.mainloop()
@@ -100,24 +100,16 @@ if __name__ == "__main__":
     gui = Vizualize()
     map = Map()
     map.add_object(0, 0, 0.1)
-    map.add_object(1, 0, 0.1)
-    map.add_object(0.5, 0.6, 0.1)
-    map.add_object(-0.5, -0.6, 0.1)
-    # map.add_object(0, -100, 50)
-    po = []
-    #for a in range(3):
-    #    pos = [random.randint(-2, 2), random.randint(-2, 2)]
-    #    po.append(map.add_point_from_position(pos))
 
-    #map.add_points_from_objects()
-    map.add_points_in_grid()
-    #map.add_points_from_objects()
+    p1 = map.add_point_from_position([-4, 0])
+    p2 = map.add_point_from_position([0, 2])
+    p3 = map.add_point_from_position([4, 0])
     map.add_all_possible_line_segments()
+    path = map.find_path(p1, p3)
+    print(path)
+    for n in path:
+        print (n.position)
     print("points:", len(map.points))
     print("line_segments:", len(map.line_segments))
-    #for a in range(len(po)):
-    #    for b in range(a + 1, len(po)):
-    #        map.add_line_segment_from_points(po[a], po[b])
-
     gui.set_map(map)
     gui.draw()
