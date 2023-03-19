@@ -39,7 +39,6 @@ class Map:
         list_of_objects = list(self.objects)
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
-                print(a, b)
                 position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
                 self.add_point_from_position(position_a)
                 self.add_point_from_position(position_b)
@@ -51,10 +50,11 @@ class Map:
         :param centre:
         """
         size = 3 # in meters
-        density = 5# in points per meter
-        for x in range(int(size*density) + 1):
-            for y in range(int(size*density) + 1):
-                position =  np.array([(y/density) - size/2, (x/density) - size/2])
+        density = 2# in points per meter
+
+        for x in range(int(size*density)):
+            for y in range(int(size*density)):
+                position = np.array([(x/density) - size/2, (y/density) - size/2])
                 self.add_point_from_position(centre + position)
 
     def add_point_from_position(self, position: np.array) -> Point:
@@ -67,7 +67,8 @@ class Map:
         new_point = Point(position)
         if new_point.__hash__() in self.points:
             return self.points[new_point.__hash__()]
-        self.add_point(new_point)
+        else:
+            self.add_point(new_point)
         return new_point
 
     def add_point(self, point: Point) -> None:
@@ -75,7 +76,7 @@ class Map:
         Adds a point to map.
         :param point:
         """
-        self.points[point.__hash__()]= point
+        self.points[point.__hash__()]=point
 
     def add_line_segment_from_positions(self, start: np.array, end: np.array) -> Line_segment:
         """
