@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import time
 
-color_img = np.load("color2.npy", allow_pickle=True)
+color_img = np.load("color1.npy", allow_pickle=True)
 hsv = cv2.cvtColor(color_img, cv2.COLOR_BGR2HSV)
 
 import timeit

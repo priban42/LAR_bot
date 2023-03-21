@@ -37,6 +37,9 @@ mask_red2 = cv2.inRange(hsv, lower_red2, upper_red2)
 
 mask = mask_blue|mask_green|mask_red1|mask_red2|mask_yellow|mask_purple
 
+out = cv2.connectedComponentsWithStats(mask_blue)
+print(out)
+
 masked_image = color_img
 masked_image = cv2.bitwise_and(color_img, color_img, mask=mask )
 end = time.time()
