@@ -19,10 +19,11 @@ class Map:
         self.path = find_path(self.graph, A, B).nodes
         return self.path
 
-    def add_object(self, x, y, r):
+    def add_object(self, x, y, r, color="orange"):
         new_object = Object()
         new_object.set_position(x, y)
         new_object.set_radius(r)
+        new_object.color = color
         self.objects.add(new_object)
         return object
 
