@@ -51,7 +51,7 @@ def save_depth_image(path, name):
 
 path = "/code/fotoaparat/color_pictures/"
 path = "color_pictures/"
-path2 = "color_pictures_jpg/"
+path2 = "color_pictures_jpg_new/"
 #path = "depth_pictures_old/"
 #name = "23_60_17_58_19.npy"
 
