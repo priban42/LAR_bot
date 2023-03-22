@@ -2,7 +2,15 @@ import numpy as np
 import cv2
 import time
 
-color_img = np.load("color1.npy", allow_pickle=True)
+#color_img = np.load("color1.npy", allow_pickle=True)
+from robolab_turtlebot import Turtlebot, Rate
+
+turtle = Turtlebot()
+turtle = Turtlebot(rgb=True, pc=True)
+turtle.wait_for_rgb_image()
+color_img = turtle.get_rgb_image()
+
+
 hsv = cv2.cvtColor(color_img, cv2.COLOR_BGR2HSV)
 
 lower_blue = np.array([95,110,70])
@@ -15,7 +23,7 @@ lower_yellow = np.array([22,110,70])
 upper_yellow = np.array([32,255,255])
 
 lower_purple = np.array([117,100,70])
-upper_purple = np.array([132,255,255])
+upper_purple = np.array([136,255,255])
 
 lower_red1 = np.array([180,105,70])
 upper_red1 = np.array([180,255,255])
@@ -33,12 +41,12 @@ mask_red2 = cv2.inRange(hsv, lower_red2, upper_red2)
 
 mask = mask_blue|mask_green|mask_red1|mask_red2|mask_yellow|mask_purple
 
-out = cv2.connectedComponentsWithStats(mask_blue)
+out = cv2.connectedComponentsWithStats(mask_purple)
 print(out[0])
 #print(out[1])
 print(out[2])
 print(out[3])
-print(out[3][1].astype("uint16"))
+#print(out[3][1].astype("uint16"))
 
 masked_image = color_img
 masked_image = cv2.bitwise_and(color_img, color_img, mask=mask )

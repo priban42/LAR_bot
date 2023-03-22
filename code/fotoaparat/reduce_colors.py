@@ -89,7 +89,7 @@ def reduce_colors(image):
 
 
 #import image in np form
-np_img_input = np.load("color_pictures/" + "23_60_17_58_14.npy", allow_pickle=True)
+np_img_input = np.load("color_pictures_old/" + "23_60_17_58_14.npy", allow_pickle=True)
 
 #convert brg to hsv
 image_hsv = cv2.cvtColor(np_img_input, cv2.COLOR_BGR2HSV)

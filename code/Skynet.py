@@ -1,6 +1,6 @@
 from computer_vision.Computer_vision import Computer_vision
-from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
-#from movement.Robot import Robot# to this
+#from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
+from movement.Robot import Robot# to this
 from map.Vizualize import Vizualize
 from map import Map
 import numpy as np
@@ -15,27 +15,62 @@ class Skynet:
         self.vizualize.set_map(self.map)
         self.vizualize.set_robot(self.robot)
 
+    def reset_map(self):
+        self.map = Map()
+        self.vizualize.set_map(self.map)
 
     def update_vision(self):
         """
         TODO: make it so that it gets the image from camera. preferably implemented in the vlass Computer_vision.
         """
-        cloud = np.load("computer_vision/cloud2.npy", allow_pickle=True)
-        color_img = np.load("computer_vision/color2.npy", allow_pickle=True)
-        arnold.vision.update_image(color_img, cloud)
+        #point_cloud = np.load("computer_vision/cloud2.npy", allow_pickle=True)
+        #color_picture = np.load("computer_vision/color2.npy", allow_pickle=True)
+        self.robot._turtle.wait_for_point_cloud()
+        point_cloud = self.robot._turtle.get_point_cloud()
+        self.robot._turtle.wait_for_rgb_image()
+        color_picture = self.robot._turtle.get_rgb_image()
+
+        cv2.imshow("bagr", color_picture)
+        cv2.waitKey()
+        #disp_point_cloud = np.zeros((point_cloud.shape[0], point_cloud.shape[1], 3), dtype=np.uint8)
+        #disp_point_cloud = point_cloud[:, :, 2]
+        #cv2.imshow("bagr", disp_point_cloud)
+        #cv2.waitKey()
+        arnold.vision.update_image(color_picture, point_cloud)
+
     def locate(self):
         self.update_vision()
         objects = self.vision.get_list_of_objects()
         for object in objects:
             color = object[0]
+            if color == "purple":
+                print(object)
             relative_position = object[1]
             absolute_position = self.robot.relative_to_absolute_position(relative_position)
-            self.map.add_object(absolute_position[0], absolute_position[1], 0.1, color=color)
+            if color == "purple":
+                self.map.add_object(absolute_position[0], absolute_position[1], 0.1, color=color)
+            else:
+                #self.map.add_object(absolute_position[0], absolute_position[1], 0.2065, color=color)
+                self.map.add_object(absolute_position[0], absolute_position[1], 0.25, color=color)
+        point = self.map.add_point_from_position(self.robot.position)
+        self.map.start_point = point
+        self.map.add_points_from_objects()
+        self.map.add_points_in_grid(self.robot.position)
+        self.map.add_all_possible_line_segments()
 
+
+    def follow_path(self, steps_to_follow):
+        path = self.map.find_path()
+        for p in path:
+            print(p)
+        self.robot.move_along_path(path[1:steps_to_follow + 1])
 
 if __name__ == "__main__":
     arnold = Skynet()
-    arnold.update_vision()
+    arnold.reset_map()
     arnold.locate()
-    arnold.vizualize.draw()
-    pass
+    try:
+        arnold.vizualize.draw()
+    except:
+        pass
+    arnold.follow_path(3)

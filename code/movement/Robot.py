@@ -1,14 +1,15 @@
 import numpy as np
-#from robolab_turtlebot import Turtlebot, Rate, get_time
+from robolab_turtlebot import Turtlebot, Rate, get_time
 import math
 
 
 class Robot:
     def __init__(self):
         self._turtle = Turtlebot()
+        self._turtle = Turtlebot(rgb=True, pc=True)
         self._rate = Rate(10)
         self.position = np.array([0, 0])
-        self.direction = np.array([1, 0])
+        self.direction = np.array([0, -1]) #x, y [0, 1] is aiming up
         self._angular_velocity = 28.6  # 1.5... *1.25
         self._linear_velocity = 0.3
         self._turtle.register_bumper_event_cb(self._bumper)
@@ -31,12 +32,14 @@ class Robot:
         Physically rotates the turtle bot by an angle. Might not be very accurate.
         :param angle: in degrees
         """
-
-        t = abs(angle) / self._angular_velocity
+        speed = (2*np.pi*self._angular_velocity)/360
+        angle_rad = (2*np.pi*angle)/360
+        t = abs(angle_rad) / speed
+        t = t*1.25 + 8/self._angular_velocity
         #t = (t + 1.0828/(self._angular_velocity * (2 * np.pi / 360)))/0.4871
         start = get_time()
-        speed = -np.sign(angle) * self._angular_velocity
-        print(t, speed)
+        speed = np.sign(angle_rad) * speed
+        print("rotation:", t, speed)
         while get_time() - start < t and self.ACTIVE:
             self._turtle.cmd_velocity(angular=speed, linear=0)
             self._rate.sleep()
@@ -50,10 +53,11 @@ class Robot:
         :param distance: in meters
         """
         t = abs(distance) / self._linear_velocity
-        t = (t - 0.4603/self._linear_velocity)/0.9208
+        #t = (t - 0.4603/self._linear_velocity)/0.9208
+        t = t*1.13 - self._linear_velocity*0.1
         start = get_time()
         speed = np.sign(distance) * self._linear_velocity
-        print(t, speed)
+        print("linear movement:", t, speed)
         while get_time() - start < t and self.ACTIVE:
             self._turtle.cmd_velocity(linear=speed, angular=0)
             self._rate.sleep()
@@ -73,6 +77,18 @@ class Robot:
         angle = np.rad2deg(ang1 - ang2) % (360)
         if angle > 180:
             angle -= 360
+        return angle
+
+    @staticmethod
+    def _clockwise_angle_between_vectors(vect1: np.ndarray, vect2: np.ndarray) -> float:
+        """
+        :param vect1: main vector. (use Robot.direction here)
+        :param vect2: secondary vector
+        :return: angle between 0° and 360° in clockwise direction
+        """
+        ang1 = np.arctan2(*vect1[::-1])
+        ang2 = np.arctan2(*vect2[::-1])
+        angle = np.rad2deg(ang1 - ang2) % 360
         return angle
 
     @staticmethod
@@ -97,6 +113,13 @@ class Robot:
         theta = np.deg2rad(-angle)
         rot = np.array([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]])
         return (np.dot(rot, vect))
+
+    def relative_to_absolute_position(self, relative_position):
+        base_vector = np.array([0, 1])
+        angle = self._clockwise_angle_between_vectors(base_vector, self.direction)
+        rotated_position = self._rotate_vector(relative_position, angle)
+        absolute_position = rotated_position + self.position
+        return absolute_position
 
     def align_with_vector(self, vect: np.ndarray) -> None:
         """

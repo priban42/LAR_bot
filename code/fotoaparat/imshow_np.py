@@ -49,10 +49,10 @@ def save_depth_image(path, name):
     #cv2.imshow(name, grayscale)
     #cv2.waitKey()
 
-path = "/home.nfs/pribavoj/PycharmProjects/LAR_bot/code/fotoaparat/color_pictures/"
+path = "/code/fotoaparat/color_pictures/"
 path = "color_pictures/"
 path2 = "color_pictures_jpg/"
-#path = "depth_pictures/"
+#path = "depth_pictures_old/"
 #name = "23_60_17_58_19.npy"
 
 #display_color_image(path, "23_67_16_38_57.npy")

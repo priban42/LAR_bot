@@ -14,9 +14,16 @@ class Map:
         self.path = []
         self.centre = [450, 250]  # offset pro vizualizaci (posule levy horni roh do stredu)
         self.graph = Graph()
+        self.start_point = None
+        self.final_point = None
+        self.path_extension = []
 
-    def find_path(self, A, B):
-        self.path = find_path(self.graph, A, B).nodes
+    def find_path_old(self, A, B):
+        self.path = find_path(self.graph, A, B).nodes + self.path_extension
+        return self.path
+
+    def find_path(self):
+        self.path = find_path(self.graph, self.start_point, self.final_point).nodes + self.path_extension
         return self.path
 
     def add_object(self, x, y, r, color="orange"):
@@ -41,8 +48,16 @@ class Map:
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
                 position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
-                self.add_point_from_position(position_a)
-                self.add_point_from_position(position_b)
+                pa = self.add_point_from_position(position_a)
+                pb = self.add_point_from_position(position_b)
+                if list_of_objects[a].color == "purple" and list_of_objects[b].color == "purple":
+                    start = self.start_point.position
+                    if np.linalg.norm(start - position_a) > np.linalg.norm(start-position_b):
+                        self.final_point = pb
+                        self.path_extension = [pa]
+                    else:
+                        self.final_point = pa
+                        self.path_extension = [pb]
 
     def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
         """
@@ -50,8 +65,8 @@ class Map:
         (End of the universe kind of long)
         :param centre:
         """
-        size = 3 # in meters
-        density = 2# in points per meter
+        size = 6 # in meters
+        density = 1# in points per meter
 
         for x in range(int(size*density)):
             for y in range(int(size*density)):
