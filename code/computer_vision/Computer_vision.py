@@ -18,13 +18,39 @@ class Computer_vision:
         self.point_cloud = None
         self.max_u = 640
         self.max_v = 480
-        self.max_object_size = 50000
+        self.max_object_size = 100000
         self.min_object_size = 500
+        self.color_masks = dict()
 
+    def _click_data(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            print("[U, V]:",[x, y],"HSV:", self.hsv_image[y, x], "BGR:", self.color_image[y, x], "distance:", np.linalg.norm(self.point_cloud[y, x]))
     def update_image(self, color_img, point_cloud):
         self.color_image = color_img
         self.point_cloud = point_cloud
         self.hsv_image = cv2.cvtColor(color_img, cv2.COLOR_BGR2HSV)
+
+    def display_color_img(self):
+        cv2.imshow("BGR", self.bgr_image)
+        cv2.setMouseCallback('BGR', self._click_data)
+        cv2.waitKey()
+
+    def display_hsv_img(self):
+        cv2.imshow("HSV", self.hsv_image)
+        cv2.setMouseCallback('HSV', self._click_data);
+        cv2.waitKey()
+    def display_pc_img(self):
+        depth_img = self.point_cloud[:, :, 2]
+        print(depth_img)
+        cv2.imshow("Point cloud represented as depth", depth_img)
+        cv2.setMouseCallback('Point cloud represented as depth', self._click_data);
+        cv2.waitKey()
+
+    def display_color_masks(self, colors):
+        final_mask = self.color_masks[colors[0]]
+        for color in colors[1:]:
+            final_mask = final_mask | self.color_masks[color]
+
 
     def get_color_mask(self, color):
         if color == "red":
@@ -35,8 +61,12 @@ class Computer_vision:
             mask = cv2.inRange(self.hsv_image, self.COLOR_BOUNDS[color][0], self.COLOR_BOUNDS[color][1])
         return mask
 
+    def update_color_masks(self):
+        for color in self.COLORS:
+            self.masks[color] = self.get_color_mask(color)
     def get_color_center_position(self, color):
-        mask = self.get_color_mask(color)
+        #mask = self.get_color_mask(color)
+        mask = self.color_masks[color]
         out = cv2.connectedComponentsWithStats(mask)
 
         positions = []
@@ -60,6 +90,7 @@ class Computer_vision:
 
     def get_list_of_objects(self):
         objects = []
+        self.update_color_masks()
         for color in self.COLORS:
             uvs = self.get_color_center_position(color)
             #print(color, uvs)
@@ -74,8 +105,9 @@ class Computer_vision:
 
 if __name__ == "__main__":
     copmputer_vision = Computer_vision()
-    cloud = np.load("cloud2.npy", allow_pickle=True)
-    color_img = np.load("color2.npy", allow_pickle=True)
+    cloud = np.load("cloud1.npy", allow_pickle=True)
+    color_img = np.load("color1.npy", allow_pickle=True)
     copmputer_vision.update_image(color_img, cloud)
-    objects = copmputer_vision.get_list_of_objects()
-    print(objects)
+    #copmputer_vision.display_pc_img()
+    #objects = copmputer_vision.get_list_of_objects()
+    #print(objects)

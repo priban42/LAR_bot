@@ -1,6 +1,6 @@
 from computer_vision.Computer_vision import Computer_vision
-#from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
-from movement.Robot import Robot# to this
+from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
+#from movement.Robot import Robot# to this
 from map.Vizualize import Vizualize
 from map import Map
 import numpy as np

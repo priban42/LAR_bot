@@ -114,6 +114,3 @@ class Vizualize():
 
         self._window.mainloop()
         self._window.update()
-
-
-
