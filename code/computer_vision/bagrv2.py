@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import time
 
-color_img = np.load("color2.npy", allow_pickle=True)
+color_img = np.load("color1.npy", allow_pickle=True)
 hsv = cv2.cvtColor(color_img, cv2.COLOR_BGR2HSV)
 
 import timeit
@@ -40,7 +40,7 @@ mask = mask_blue|mask_green|mask_red1|mask_red2|mask_yellow|mask_purple
 out = cv2.connectedComponentsWithStats(mask_blue)
 print(out)
 
-masked_image = color_img
+#masked_image = color_img
 masked_image = cv2.bitwise_and(color_img, color_img, mask=mask )
 end = time.time()
 print(end - start)
