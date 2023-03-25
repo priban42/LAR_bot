@@ -147,6 +147,10 @@ class Computer_vision:
         cv2.waitKey()
 
     def update_contours(self):
+        """
+        Generates countours and filters them by size.
+        Desirable contours are then placed in self.contours according to their color.
+        """
         for color in self.COLORS:
             filtered_contours = []
             contours, hierarchy = cv2.findContours(self.color_masks[color], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -156,6 +160,10 @@ class Computer_vision:
             self.contours[color] = filtered_contours
 
     def display_contours(self, *colors):
+        """
+        Displays contours according to selected colors.
+        :param colors: A list of colors, where colors are sring names. for example:  "red", "blue", ....
+        """
         img = self.bgr_image
         for color in colors:
             cv2.drawContours(img, self.contours[color], -1, (0, 255, 0), 1)
