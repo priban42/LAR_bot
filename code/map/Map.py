@@ -23,7 +23,11 @@ class Map:
         return self.path
 
     def find_path(self):
-        self.path = find_path(self.graph, self.start_point, self.final_point).nodes + self.path_extension
+        try:
+            self.path = find_path(self.graph, self.start_point, self.final_point).nodes + self.path_extension
+        except:
+            print("path not found!")
+            self.path = []
         return self.path
 
     def add_object(self, x, y, r, color="orange"):
