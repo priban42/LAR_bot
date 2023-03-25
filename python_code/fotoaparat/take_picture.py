@@ -33,9 +33,9 @@ def take_pictures(msg):
     turtle.wait_for_depth_image()
     depth_picture = turtle.get_depth_image()
     #print(color_picture)
-    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/code/fotoaparat/point_cloud_pictures/" + str(rand), point_cloud, allow_pickle=True)
-    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/code/fotoaparat/color_pictures/" + str(rand), color_picture, allow_pickle=True)
-    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/code/fotoaparat/depth_pictures/" + str(rand), depth_picture, allow_pickle=True)
+    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/python_code/fotoaparat/point_cloud_pictures/" + str(rand), point_cloud, allow_pickle=True)
+    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/python_code/fotoaparat/color_pictures/" + str(rand), color_picture, allow_pickle=True)
+    np.save("/home.nfs/pribavoj/PycharmProjects/LAR_bot/python_code/fotoaparat/depth_pictures/" + str(rand), depth_picture, allow_pickle=True)
     print("picture taken")
 
 def bumper_cb(msg):
@@ -48,7 +48,7 @@ def bumper_cb(msg):
         take_pictures(msg)
 
 def main():
-    #/home.nfs/pribavoj/PycharmProjects/LAR_bot/code/fotoaparat/take_picture.py
+    #/home.nfs/pribavoj/PycharmProjects/LAR_bot/python_code/fotoaparat/take_picture.py
     global turtle
     turtle = Turtlebot(rgb=True, depth=True, pc=True)
     rate = Rate(1)

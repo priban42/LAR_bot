@@ -68,8 +68,12 @@ if __name__ == "__main__":
     arnold = Skynet()
     arnold.reset_map()
     arnold.locate()
+    print("ba")
+    arnold.vizualize.draw()
+    print("gr")
     try:
-        arnold.vizualize.draw(True)
+        pass
     except:
+        print("failed")
         pass
     #arnold.follow_path(3)

@@ -283,7 +283,7 @@ class Graph(MutableMapping):
         following types are supported: booleans, integers, long
         integers, floating point numbers, complex numbers, strings,
         Unicode objects, tuples, lists, sets, frozensets, dictionaries,
-        and code objects.
+        and python_code objects.
 
         """
         return cls._read(marshal.load, from_)

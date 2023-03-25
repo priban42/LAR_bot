@@ -49,7 +49,7 @@ def save_depth_image(path, name):
     #cv2.imshow(name, grayscale)
     #cv2.waitKey()
 
-path = "/code/fotoaparat/color_pictures/"
+path = "/python_code/fotoaparat/color_pictures/"
 path = "color_pictures/"
 path2 = "color_pictures_jpg_new/"
 #path = "depth_pictures_old/"
