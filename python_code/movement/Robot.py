@@ -1,19 +1,23 @@
 import numpy as np
 from robolab_turtlebot import Turtlebot, Rate, get_time
 import math
+import time
 
 
 class Robot:
     def __init__(self):
-        self._turtle = Turtlebot()
-        self._turtle = Turtlebot(rgb=True, pc=True)
+        self.turtle = Turtlebot()
+        self.turtle = Turtlebot(rgb=True, pc=True)
         self._rate = Rate(10)
         self.position = np.array([0, 0])
         self.direction = np.array([0, -1]) #x, y [0, 1] is aiming up
-        self._angular_velocity = 28.6  # 1.5... *1.25
-        self._linear_velocity = 0.3
-        self._turtle.register_bumper_event_cb(self._bumper)
+        self._angular_velocity = 28.6  # in degrees/sec
+        self._angular_acceleration = 28.6  # in degrees/sec
+        self._linear_velocity = 0.3  # in meters/sec
+        self._linear_acceleration = 0.3
+        self.turtle.register_bumper_event_cb(self._bumper)
         self.ACTIVE = True
+
         print("robot initialized...")
 
     def __str__(self):
@@ -27,7 +31,7 @@ class Robot:
         print("BUMPER PRESSED!")
         self.ACTIVE = False
 
-    def rotate_bot(self, angle: float) -> None:  # deg
+    def rotate_bot_old(self, angle: float) -> None:  # deg
         """
         Physically rotates the turtle bot by an angle. Might not be very accurate.
         :param angle: in degrees
@@ -35,19 +39,69 @@ class Robot:
         speed = (2*np.pi*self._angular_velocity)/360
         angle_rad = (2*np.pi*angle)/360
         t = abs(angle_rad) / speed
-        t = t*1.25 + 8/self._angular_velocity
+        t = t*1.3 + 4/self._angular_velocity
         #t = (t + 1.0828/(self._angular_velocity * (2 * np.pi / 360)))/0.4871
         start = get_time()
         speed = np.sign(angle_rad) * speed
         print("rotation:", t, speed)
         while get_time() - start < t and self.ACTIVE:
-            self._turtle.cmd_velocity(angular=speed, linear=0)
+            self.turtle.cmd_velocity(angular=speed, linear=0)
             self._rate.sleep()
         if not self.ACTIVE:
-            self._turtle.cmd_velocity(linear=0, angular=0)
+            self.turtle.cmd_velocity(linear=0, angular=0)
         self.direction = self._rotate_vector(self.direction, angle)
 
-    def move_bot(self, distance: float) -> None:
+    def rotate_bot(self, angle: float) -> None:
+        """
+        Physically moves the turtle bot a certain distance. Might not be very accurate.
+        :param distance: in meters
+        """
+        #time.sleep(1)
+        self.turtle.reset_odometry()
+        time.sleep(0.5)
+        angle_sign = np.sign(angle)
+        abs_angle = abs(angle)
+
+        if abs_angle > (self._angular_acceleration**2)/self._angular_velocity:
+            abs_angle = abs_angle - 4*self._angular_velocity/28.6
+        else:
+            abs_angle = abs_angle# - 0.5*(np.sqrt(abs_angle*self._linear_acceleration))/(28.6)
+
+        angle_rad = ((abs_angle - 4)/360)*2*np.pi
+        #print(angle_sign, angle_rad)
+        angular_acceleration_rad = (self._angular_acceleration/360)*2*np.pi
+        angular_velocity_rad = (self._angular_velocity/360)*2*np.pi
+        t_last = get_time()
+        v = 0 #current velocity
+        distance_travelled = 0
+        while(distance_travelled < angle_rad/2):
+            dt = get_time() - t_last
+            dv = angular_acceleration_rad * dt
+            if v < angular_velocity_rad:
+                v += dv
+            self.turtle.cmd_velocity(linear = 0, angular = v*angle_sign)
+            t_last = get_time()
+            self._rate.sleep()
+            x, y, a = self.turtle.get_odometry()#a is from -pi to pi
+            distance_travelled = abs(a)
+            #print(distance_travelled)
+            if not self.ACTIVE:
+                self.turtle.cmd_velocity(linear=0, angular=0)
+                break
+        while(distance_travelled < angle_rad):
+            self.turtle.cmd_velocity(linear=0, angular=v*angle_sign)
+            self._rate.sleep()
+            x, y, a = self.turtle.get_odometry()
+            distance_travelled = abs(a)
+            #print("2.2", distance_travelled)
+            if not self.ACTIVE:
+                self.turtle.cmd_velocity(linear=0, angular=0)
+                break
+        self.turtle.cmd_velocity(linear=0, angular=0)
+        self.direction = self._rotate_vector(self.direction, angle)
+        #self.position = self.position + self.direction*distance
+
+    def move_bot_old(self, distance: float) -> None:
         """
         Physically moves the turtle bot a certain distance. Might not be very accurate.
         :param distance: in meters
@@ -59,10 +113,55 @@ class Robot:
         speed = np.sign(distance) * self._linear_velocity
         print("linear movement:", t, speed)
         while get_time() - start < t and self.ACTIVE:
-            self._turtle.cmd_velocity(linear=speed, angular=0)
+            self.turtle.cmd_velocity(linear=speed, angular=0)
             self._rate.sleep()
         if not self.ACTIVE:
-            self._turtle.cmd_velocity(linear=0, angular=0)
+            self.turtle.cmd_velocity(linear=0, angular=0)
+        self.position = self.position + self.direction*distance
+
+    def move_bot(self, dist: float) -> None:
+        """
+        Physically moves the turtle bot a certain distance. Might not be very accurate.
+        :param distance: in meters
+        """
+        #time.sleep(1)
+        self.turtle.reset_odometry()
+        time.sleep(0.5)
+        if dist > (self._linear_velocity**2)/self._linear_acceleration:
+            distance = dist - 0.05*self._linear_velocity/0.3
+        else:
+            distance = dist - 0.045*(np.sqrt(dist*self._linear_acceleration))/(0.3)
+        #print((self._linear_velocity**2)/self._linear_acceleration)
+        #print(distance)
+        t_last = get_time()
+        v = 0 #current velocity
+        distance_travelled = 0
+        while(distance_travelled < distance/2):
+            dt = get_time() - t_last
+            dv = self._linear_acceleration * dt
+            if v < self._linear_velocity:
+                v += dv
+            self.turtle.cmd_velocity(linear = v, angular = 0)
+            t_last = get_time()
+            self._rate.sleep()
+            x, y, a = self.turtle.get_odometry()
+            odometry_vector = np.array([x, y])
+            distance_travelled = np.linalg.norm(odometry_vector)
+            #print(distance_travelled)
+            if not self.ACTIVE:
+                self.turtle.cmd_velocity(linear=0, angular=0)
+                break
+        while(distance_travelled < distance):
+            self.turtle.cmd_velocity(linear=v, angular=0)
+            self._rate.sleep()
+            x, y, a = self.turtle.get_odometry()
+            odometry_vector = np.array([x, y])
+            distance_travelled = np.linalg.norm(odometry_vector)
+            #print("2.2", distance_travelled)
+            if not self.ACTIVE:
+                self.turtle.cmd_velocity(linear=0, angular=0)
+                break
+        self.turtle.cmd_velocity(linear=0, angular=0)
         self.position = self.position + self.direction*distance
 
     @staticmethod
@@ -137,8 +236,13 @@ class Robot:
         self.align_with_vector(vect)
         self.move_bot(distance)
 
-    def move_along_path(self, path):
+    def move_along_path(self, path, max_dist = 100):
+        distance_traveled = 0
         for position in path:
+            #dist = np.linalg.norm(self.position - position)
+            #if self.distance_traveled + dist > max_dist:
+            #    new_position = self.position - position
+            #    self.move_to_position(position)
             self.move_to_position(position)
 
     if __name__ == "__main__":

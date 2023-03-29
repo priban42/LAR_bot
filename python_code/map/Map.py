@@ -70,7 +70,7 @@ class Map:
         :param centre:
         """
         size = 6 # in meters
-        density = 1# in points per meter
+        density = 2# in points per meter
 
         for x in range(int(size*density)):
             for y in range(int(size*density)):
