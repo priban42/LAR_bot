@@ -17,6 +17,7 @@ class Map:
         self.start_point = None
         self.final_point = None
         self.path_extension = []
+        self.GARAGE_DEPTH = 0.22#in meters
 
     def find_path_old(self, A, B):
         self.path = find_path(self.graph, A, B).nodes + self.path_extension
@@ -51,17 +52,23 @@ class Map:
         list_of_objects = list(self.objects)
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
-                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
+                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b], 1)
                 pa = self.add_point_from_position(position_a)
                 pb = self.add_point_from_position(position_b)
                 if list_of_objects[a].color == "purple" and list_of_objects[b].color == "purple":
                     start = self.start_point.position
                     if np.linalg.norm(start - position_a) > np.linalg.norm(start-position_b):
+                        extension_position_vect = (pa.position - pb.position)
+                        extension_position = (pb.position + pa.position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
                         self.final_point = pb
-                        self.path_extension = [pa]
+                        self.path_extension = [self.add_point_from_position(extension_position)]
                     else:
+                        extension_position_vect = (pb.position - pa.position)
+                        extension_position = (pb.position + pa.position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
                         self.final_point = pa
-                        self.path_extension = [pb]
+                        self.path_extension = [self.add_point_from_position(extension_position)]
+
+
 
     def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
         """
@@ -69,8 +76,8 @@ class Map:
         (End of the universe kind of long)
         :param centre:
         """
-        size = 6 # in meters
-        density = 2# in points per meter
+        size = 5 # in meters
+        density = 1# in points per meter
 
         for x in range(int(size*density)):
             for y in range(int(size*density)):

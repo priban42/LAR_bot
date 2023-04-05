@@ -74,21 +74,18 @@ if __name__ == "__main__":
     #os.system('rosrun sound_play soundplay_node.py')
     #os.system('rosrun sound_play say.py "Never Gonna Give You Up"')
     #arnold.robot.turtle.play_sound()
-
     arnold.reset_map()
     arnold.locate()
     try:
         arnold.vizualize.draw(True)
     except:
-        print("failed")
         pass
-    arnold.follow_path(2)
+    arnold.follow_path(1)
     arnold.reset_map()
     arnold.locate()
     try:
         arnold.vizualize.draw(True)
     except:
-        print("failed")
         pass
     arnold.follow_path(10)
 

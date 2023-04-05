@@ -21,7 +21,7 @@ class Object(Entity):
 
     import math
 
-    def get_adjecent_points(self, object: 'Object') -> tuple:
+    def get_adjecent_points(self, object: 'Object', additional_spread=0) -> tuple:
         """
         generates 2 coordinates for points laying in between 2 objects.
          the points lay on lines tanget to the obejct circle and have the same distance from both centres.
@@ -31,7 +31,7 @@ class Object(Entity):
         vect = (object.position - self.position)/2
         radius = (self.radius + object.radius)/2
         ortogonal_vect = np.array([-vect[1], vect[0]])
-        ortogonal_vect = (radius * ortogonal_vect)/np.linalg.norm(ortogonal_vect)
+        ortogonal_vect = ((additional_spread + 1)*radius * ortogonal_vect)/np.linalg.norm(ortogonal_vect)
         return self.position + vect + ortogonal_vect, self.position + vect - ortogonal_vect
 
 
