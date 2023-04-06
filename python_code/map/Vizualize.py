@@ -73,12 +73,12 @@ class Vizualize():
 
         self.canvas.create_line(line_start_x, line_start_y, line_end_x, line_end_y, fill="green", width=5)
 
-    def _draw_point(self, point):
+    def _draw_point(self, point, size = 3):
         self._center_view()
-        self.canvas.create_oval(point.position[0] * self.scale + self.centre[0] - 3,
-                                point.position[1] * self.scale + self.centre[1] - 3,
-                                point.position[0] * self.scale + self.centre[0] + 3,
-                                point.position[1] * self.scale + self.centre[1] + 3, fill=point.color)
+        self.canvas.create_oval(point.position[0] * self.scale + self.centre[0] - size,
+                                point.position[1] * self.scale + self.centre[1] - size,
+                                point.position[0] * self.scale + self.centre[0] + size,
+                                point.position[1] * self.scale + self.centre[1] + size, fill=point.color)
 
     def _draw_line_segment(self, line_segment):
         self._center_view()
@@ -117,7 +117,7 @@ class Vizualize():
 
     def draw(self, draw_path = False):
         self._draw_grid()
-        for object in self.map.objects:
+        for object in self.map.get_list_of_objects():
             self._draw_object(object)
         if draw_path:
             self._draw_path()
@@ -126,6 +126,7 @@ class Vizualize():
                 self._draw_line_segment(line_segment)
             for point in self.map.points.values():
                 self._draw_point(point)
+        self._draw_point(self.map.point_of_interest, 5)
         self._draw_robot(self.robot)
 
         self._window.mainloop()

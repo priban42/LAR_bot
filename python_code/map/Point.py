@@ -14,4 +14,5 @@ class Point(Entity):
     def __str__(self):
         return "{" + str(self.position[0]) + ", " + str(self.position[1]) + "}"
     def __hash__(self):
-        return int((10 ** 5) *self.position[0] + (10 ** 10) * self.position[1])
+        #return int((10 ** 5) *self.position[0] + (10 ** 10) * self.position[1])
+        return hash((self.position[0], self.position[1]))

@@ -105,15 +105,22 @@ class Robot:
         self.direction = self._normalize_vector(vect)
 
 
-    def move_to_position(self, point):
-        vect = point.position - self.position
+    def move_to_position(self, position):
+        vect = position - self.position
         distance = np.linalg.norm(vect)
         self.align_with_vector(vect)
         self.move_bot(distance)
 
-    def move_along_path(self, path):
-        for position in path:
-            self.move_to_position(position)
+    def move_along_path(self, path, max_distance = 1000):
+        distance_traveled = 0
+        for point in path:
+            distance = np.linalg.norm(self.position - point.position)
+            if max_distance > distance_traveled + distance:
+                self.move_to_position(point.position)
+            else:
+                norm_vect = (point.position - self.position)/np.linalg.norm(point.position - self.position)
+                new_position = self.position + (max_distance - distance_traveled) * norm_vect
+                self.move_to_position(new_position)
 
     if __name__ == "__main__":
         pass

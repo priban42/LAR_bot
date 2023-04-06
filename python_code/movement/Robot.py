@@ -229,6 +229,9 @@ class Robot:
         self.rotate_bot(angle)
         self.direction = self._normalize_vector(vect)
 
+    def look_at_position(self, position):
+        vector = position - self.position
+        self.align_with_vector(vector)
 
     def move_to_position(self, point):
         vect = point.position - self.position

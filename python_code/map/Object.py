@@ -14,7 +14,8 @@ class Object(Entity):
         return comparison.all() and self.radius == other.radius
 
     def __hash__(self):
-        return int(self.position[0] + 2*(10 ** 10) * self.position[1] + (10 ** 5)*self.radius)
+        #return int(self.position[0] + 2*(10 ** 10) * self.position[1] + (10 ** 5)*self.radius)
+        return hash((self.position[0], self.position[1], self.radius))
 
     def set_radius(self, r):
         self.radius = r

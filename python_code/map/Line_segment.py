@@ -17,5 +17,6 @@ class Line_segment():
         return (self.A == other.A and self.B == other.B) or (self.A == other.B and self.B == other.A)
 
     def __hash__(self):
-        return int((10 ** 5)*self.A.position[0] + (10 ** 10) * self.A.position[1] +
-                   (10 ** 15)*self.B.position[0] + (10 ** 20) * self.B.position[1])
+        #return int((10 ** 5)*self.A.position[0] + (10 ** 10) * self.A.position[1] +
+        #           (10 ** 15)*self.B.position[0] + (10 ** 20) * self.B.position[1])
+        return hash((self.A.position[0], self.A.position[1], self.B.position[0], self.B.position[1]))

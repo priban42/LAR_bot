@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from .Object import Object
 from .Line_segment import Line_segment
@@ -7,8 +9,10 @@ from .algorithm import find_path
 
 
 class Map:
+    COLORS = ["blue", "green", "yellow", "purple", "red", "grey"]
     def __init__(self):
-        self.objects = set() # every object is unique. This set is only accessed direcly from self.add_object().
+        #self.objects = set() # every object is unique. This set is only accessed direcly from self.add_object().
+        self.objects = {"red": dict(), "blue": dict(), "green": dict(), "purple": dict(), "yellow": dict(), "grey": dict()}
         self.points = dict() # every point is unique. This set is only accessed direcly from self.add_point().
         self.line_segments = set() # every point is unique. This set is only accessed direcly from self.add_line_segment().
         self.path = []
@@ -16,6 +20,7 @@ class Map:
         self.graph = Graph()
         self.start_point = None
         self.final_point = None
+        self.point_of_interest = None
         self.path_extension = []
         self.GARAGE_DEPTH = 0.22#in meters
 
@@ -31,13 +36,30 @@ class Map:
             self.path = []
         return self.path
 
-    def add_object(self, x, y, r, color="orange"):
+    def add_object_from_position(self, x, y, r, color):
         new_object = Object()
         new_object.set_position(x, y)
         new_object.set_radius(r)
         new_object.color = color
-        self.objects.add(new_object)
+        self.add_object(new_object)
         return object
+
+    def get_list_of_objects(self, whitelist_colors = [], blacklist_colors = []):
+        list_of_objects = []
+        if len(whitelist_colors) > 0:
+            for color in whitelist_colors:
+                list_of_objects += list(self.objects[color].values())
+        elif len(blacklist_colors) > 0:
+            for color in Map.COLORS:
+                if color not in blacklist_colors:
+                    list_of_objects += list(self.objects[color].values())
+        else:
+            for color in Map.COLORS:
+                list_of_objects += list(self.objects[color].values())
+        return list_of_objects
+
+    def add_object(self, object):
+        self.objects[object.color][object.__hash__()] = object
 
     def add_line_segment(self, line_segment):
         self.line_segments.add(line_segment)
@@ -49,12 +71,16 @@ class Map:
         takes all objects in map and generates points accordingly.
         (makes 2 points for each par of objects in between)
         """
-        list_of_objects = list(self.objects)
+        list_of_objects = self.get_list_of_objects(whitelist_colors=["red", "green", "blue", "yellow"])
+
+        #print(type(list_of_objects[0]))
+        #list_of_objects = self.objects["red"].values() + self.objects["green"].values() + self.objects["blue"].values()
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
                 position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b], 1)
                 pa = self.add_point_from_position(position_a)
                 pb = self.add_point_from_position(position_b)
+                """
                 if list_of_objects[a].color == "purple" and list_of_objects[b].color == "purple":
                     start = self.start_point.position
                     if np.linalg.norm(start - position_a) > np.linalg.norm(start-position_b):
@@ -67,7 +93,61 @@ class Map:
                         extension_position = (pb.position + pa.position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
                         self.final_point = pa
                         self.path_extension = [self.add_point_from_position(extension_position)]
+                """
+        self.find_purple_gate()
 
+    def find_purple_gate(self):
+        """
+        if 2 purple objects are present in map,
+         this function finds a point in front of them such,
+          that the purple gate is stull visible for the robot from that point.
+        """
+        purple_objects = self.get_list_of_objects(whitelist_colors=["purple"])
+        if len(purple_objects) == 2:
+            position_a, position_b = purple_objects[0].get_adjecent_points(purple_objects[1], 1)
+            if np.linalg.norm(position_a - self.start_point.position) > np.linalg.norm(position_b - self.start_point.position):
+                closer_adjacent_position = position_b
+                farther_adjacent_position = position_a
+                #left_purple_object = purple_objects[1]
+                #right_purple_object = purple_objects[0]
+            else:
+                closer_adjacent_position = position_a
+                farther_adjacent_position = position_b
+                #left_purple_object = purple_objects[0]
+                #right_purple_object = purple_objects[1]
+            self.final_point = self.add_point_from_position(closer_adjacent_position)
+            extension_position_vect = (farther_adjacent_position - closer_adjacent_position)
+            extension_position = (closer_adjacent_position + farther_adjacent_position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
+            self.path_extension = [self.add_point_from_position(extension_position)]
+            return True
+        return False
+    def find_point_of_interest(self):
+        """
+        A heurestic function meant fo find a point near the final destination.
+        """
+        purple_objects = self.get_list_of_objects(whitelist_colors=["purple"])
+        yellow_objects = self.get_list_of_objects(whitelist_colors=["yellow"])
+        color_objects = self.get_list_of_objects(blacklist_colors=["grey"])
+        if len(purple_objects) == 2:
+            self.point_of_interest = self.add_point_from_position((purple_objects[0].position + purple_objects[1].position)/2) # centre of gate
+            self.point_of_interest.color = "purple"
+        elif len(yellow_objects) > 0:
+            position_sum = np.array([0, 0])
+            for object in yellow_objects:
+                position_sum += object.position
+            self.point_of_interest = self.add_point_from_position(position_sum/len(yellow_objects))  # avg yellow position
+            self.point_of_interest.color = "yellow"
+        elif len(color_objects) > 0:
+            position_sum = np.array([0, 0])
+            for object in color_objects:
+                position_sum += object.position
+            self.point_of_interest = self.add_point_from_position(position_sum/len(color_objects))  # avg yellow position
+            self.point_of_interest.color = "cyan2"
+        else:
+            self.point_of_interest = np.array([random.randint(-100  + self.start_point[0], 100  + self.start_point[0]),
+                                               random.randint(-100  + self.start_point[1], 100  + self.start_point[1])])
+            self.point_of_interest.color = "gray26"
+            print("random point of interest added")
 
 
     def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
@@ -151,7 +231,12 @@ class Map:
         :param line_segment:
         :return: False if no intersection occurs.
         """
-        for object in self.objects:
+        #list_of_objects = []
+        #for color in ["red", "green", "blue", "yellow", "purple"]:
+        #    list_of_objects += list(self.objects[color].values())
+        list_of_objects = self.get_list_of_objects()
+        for object in list_of_objects:
+            #print("object:", type(object), object)
             if object.line_segment_intersects_circle(line_segment):
                 return True
         return False
