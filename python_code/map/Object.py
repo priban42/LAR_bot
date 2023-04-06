@@ -1,6 +1,8 @@
 import numpy as np
+from .Line_segment import Line_segment
 from .Entity import Entity
 import math
+
 
 
 class Object(Entity):
@@ -13,14 +15,10 @@ class Object(Entity):
         comparison = self.position == other.position
         return comparison.all() and self.radius == other.radius
 
+    def __str__(self):
+        return f'[Object: {self.color}, [{self.position[0]:.2f}, {self.position[1]:.2f}], {self.radius}]'
     def __hash__(self):
-        #return int(self.position[0] + 2*(10 ** 10) * self.position[1] + (10 ** 5)*self.radius)
         return hash((self.position[0], self.position[1], self.radius))
-
-    def set_radius(self, r):
-        self.radius = r
-
-    import math
 
     def get_adjecent_points(self, object: 'Object', additional_spread=0) -> tuple:
         """
@@ -36,7 +34,7 @@ class Object(Entity):
         return self.position + vect + ortogonal_vect, self.position + vect - ortogonal_vect
 
 
-    def line_segment_intersects_circle(self, line_segment):
+    def line_segment_intersects_circle(self, line_segment: Line_segment) -> bool:
         """
         Calculates weather any point of line_segment lays in the object circle.
         :param line_segment:

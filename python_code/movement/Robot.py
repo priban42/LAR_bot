@@ -213,7 +213,12 @@ class Robot:
         rot = np.array([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]])
         return (np.dot(rot, vect))
 
-    def relative_to_absolute_position(self, relative_position):
+    def relative_to_absolute_position(self, relative_position: np.array([float, float])) -> np.array([float, float]):
+        """
+        Calculates coordinates according to robots position and angle.
+        :param relative_position:
+        :return:
+        """
         base_vector = np.array([0, 1])
         angle = self._clockwise_angle_between_vectors(base_vector, self.direction)
         rotated_position = self._rotate_vector(relative_position, angle)
@@ -222,31 +227,48 @@ class Robot:
 
     def align_with_vector(self, vect: np.ndarray) -> None:
         """
-        rotates the robot so that it aims in the same direction as vector 'vect'
-        :param vect: any nonzero 2d vector
+        rotates the robot so that it aims in the same direction as vector 'vect'.
+        :param vect: any nonzero 2d vector.
         """
         angle = self._angle_between_vectors(self.direction, vect)
         self.rotate_bot(angle)
         self.direction = self._normalize_vector(vect)
 
     def look_at_position(self, position):
+        """
+        Rotates the robot so that it aims at the 'position'.
+        :param position:
+        """
         vector = position - self.position
         self.align_with_vector(vector)
 
-    def move_to_position(self, point):
-        vect = point.position - self.position
+    def move_to_position(self, position):
+        """
+        Rotates bot and moves it forward in order to arrive at point
+        :param point:
+        """
+        vect = position - self.position
         distance = np.linalg.norm(vect)
         self.align_with_vector(vect)
         self.move_bot(distance)
 
-    def move_along_path(self, path, max_dist = 100):
+
+    def move_along_path(self, path, max_distance = 1000):
+        """
+        Moves along path.
+        :param path: a list of points to witch to travel.
+        :param max_distance: Maximal distance the robot travels on single call of this function.
+         if exceeded the robot stops moving.
+        """
         distance_traveled = 0
-        for position in path:
-            #dist = np.linalg.norm(self.position - position)
-            #if self.distance_traveled + dist > max_dist:
-            #    new_position = self.position - position
-            #    self.move_to_position(position)
-            self.move_to_position(position)
+        for point in path:
+            distance = np.linalg.norm(self.position - point.position)
+            if max_distance > distance_traveled + distance:
+                self.move_to_position(point.position)
+            else:
+                norm_vect = (point.position - self.position)/np.linalg.norm(point.position - self.position)
+                new_position = self.position + (max_distance - distance_traveled) * norm_vect
+                self.move_to_position(new_position)
 
     if __name__ == "__main__":
         pass

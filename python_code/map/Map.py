@@ -39,23 +39,26 @@ class Map:
     def add_object_from_position(self, x, y, r, color):
         new_object = Object()
         new_object.set_position(x, y)
-        new_object.set_radius(r)
+        new_object.radius = r
         new_object.color = color
         self.add_object(new_object)
         return object
 
     def get_list_of_objects(self, whitelist_colors = [], blacklist_colors = []):
+        """
+        this function is meant to make working with groups of object easier.
+        :param whitelist_colors: list of strings naming colors. for ex. ["red", "blue"...]. Has priority over blacklist
+        :param blacklist_colors: list of strings naming colors. for ex. ["red", "blue"...].
+        :return: list of objects with colors according to white/blacklist.
+        """
         list_of_objects = []
         if len(whitelist_colors) > 0:
             for color in whitelist_colors:
                 list_of_objects += list(self.objects[color].values())
-        elif len(blacklist_colors) > 0:
+        else:
             for color in Map.COLORS:
                 if color not in blacklist_colors:
                     list_of_objects += list(self.objects[color].values())
-        else:
-            for color in Map.COLORS:
-                list_of_objects += list(self.objects[color].values())
         return list_of_objects
 
     def add_object(self, object):
@@ -71,29 +74,13 @@ class Map:
         takes all objects in map and generates points accordingly.
         (makes 2 points for each par of objects in between)
         """
-        list_of_objects = self.get_list_of_objects(whitelist_colors=["red", "green", "blue", "yellow"])
+        list_of_objects = self.get_list_of_objects(whitelist_colors=["red", "green", "blue"])
 
-        #print(type(list_of_objects[0]))
-        #list_of_objects = self.objects["red"].values() + self.objects["green"].values() + self.objects["blue"].values()
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
-                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b], 1)
+                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
                 pa = self.add_point_from_position(position_a)
                 pb = self.add_point_from_position(position_b)
-                """
-                if list_of_objects[a].color == "purple" and list_of_objects[b].color == "purple":
-                    start = self.start_point.position
-                    if np.linalg.norm(start - position_a) > np.linalg.norm(start-position_b):
-                        extension_position_vect = (pa.position - pb.position)
-                        extension_position = (pb.position + pa.position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
-                        self.final_point = pb
-                        self.path_extension = [self.add_point_from_position(extension_position)]
-                    else:
-                        extension_position_vect = (pb.position - pa.position)
-                        extension_position = (pb.position + pa.position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
-                        self.final_point = pa
-                        self.path_extension = [self.add_point_from_position(extension_position)]
-                """
         self.find_purple_gate()
 
     def find_purple_gate(self):
@@ -108,13 +95,9 @@ class Map:
             if np.linalg.norm(position_a - self.start_point.position) > np.linalg.norm(position_b - self.start_point.position):
                 closer_adjacent_position = position_b
                 farther_adjacent_position = position_a
-                #left_purple_object = purple_objects[1]
-                #right_purple_object = purple_objects[0]
             else:
                 closer_adjacent_position = position_a
                 farther_adjacent_position = position_b
-                #left_purple_object = purple_objects[0]
-                #right_purple_object = purple_objects[1]
             self.final_point = self.add_point_from_position(closer_adjacent_position)
             extension_position_vect = (farther_adjacent_position - closer_adjacent_position)
             extension_position = (closer_adjacent_position + farther_adjacent_position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
@@ -156,8 +139,8 @@ class Map:
         (End of the universe kind of long)
         :param centre:
         """
-        size = 5 # in meters
-        density = 1# in points per meter
+        size = 5  # in meters
+        density = 1  # in points per meter
 
         for x in range(int(size*density)):
             for y in range(int(size*density)):
@@ -231,12 +214,8 @@ class Map:
         :param line_segment:
         :return: False if no intersection occurs.
         """
-        #list_of_objects = []
-        #for color in ["red", "green", "blue", "yellow", "purple"]:
-        #    list_of_objects += list(self.objects[color].values())
         list_of_objects = self.get_list_of_objects()
         for object in list_of_objects:
-            #print("object:", type(object), object)
             if object.line_segment_intersects_circle(line_segment):
                 return True
         return False

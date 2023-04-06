@@ -24,8 +24,8 @@ class Skynet:
         """
         TODO: make it so that it gets the image from camera. preferably implemented in the vlass Computer_vision.
         """
-        point_cloud = np.load("computer_vision/cloud2.npy", allow_pickle=True)
-        color_picture = np.load("computer_vision/color2.npy", allow_pickle=True)
+        point_cloud = np.load("computer_vision/cloud1.npy", allow_pickle=True)
+        color_picture = np.load("computer_vision/color1.npy", allow_pickle=True)
         #self.robot.turtle.wait_for_point_cloud()
         #point_cloud = self.robot.turtle.get_point_cloud()
         #self.robot.turtle.wait_for_rgb_image()
@@ -38,17 +38,16 @@ class Skynet:
     def locate(self):
         self.update_vision()
         objects = self.vision.get_list_of_objects()
-        print(objects)
         for object in objects:
             color = object[0]
-            if color == "purple":
-                print(object)
             relative_position = object[1]
             absolute_position = self.robot.relative_to_absolute_position(relative_position)
             if color == "purple":
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.2, color=color)
             elif color == "yellow":
-                self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.2, color=color)
+                self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.15, color=color)
+            elif color == "grey":
+                self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.25, color=color)
             else:
                 #self.map.add_object(absolute_position[0], absolute_position[1], 0.2065, color=color)
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.35, color=color)
@@ -64,8 +63,6 @@ class Skynet:
 
     def follow_path(self, steps_to_follow, max_distance):
         path = self.map.find_path()
-        for p in path:
-            print(p)
         self.robot.move_along_path(path[1:steps_to_follow + 1], max_distance)
 
 def main():
@@ -73,7 +70,7 @@ def main():
     arnold.reset_map()
     arnold.locate()
     try:
-        arnold.vizualize.draw(True)
+        arnold.vizualize.draw(False)
     except:
         pass
     arnold.follow_path(1, 0.5)

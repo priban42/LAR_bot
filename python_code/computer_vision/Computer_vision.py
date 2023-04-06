@@ -3,7 +3,6 @@ import cv2
 import sys
 import time
 
-
 class Computer_vision:
     COLORS = ["blue", "green", "yellow", "purple", "red"]
     COLOR_BOUNDS = {
@@ -21,9 +20,8 @@ class Computer_vision:
         self.max_v = 480
         self.max_object_size = 100000
         self.min_object_size = 500
-        self.color_masks = {"blue": None, "green": None, "yellow": None, "purple": None, "red":None}
-        self.connected_components = {"blue": None, "green": None, "yellow": None, "purple": None, "red":None}
-        self.contours = {"blue": None, "green": None, "yellow": None, "purple": None, "red":None}
+        self.color_masks = {"blue": None, "green": None, "yellow": None, "purple": None, "red":None, "grey":None}
+        self.contours = {"blue": None, "green": None, "yellow": None, "purple": None, "red":None, "grey":None}
 
     def _click_data(self, event, x, y, flags, param):
         """
@@ -51,6 +49,7 @@ class Computer_vision:
         cv2.imshow("BGR", self.bgr_image)
         cv2.setMouseCallback('BGR', self._click_data)
         cv2.waitKey()
+
 
     def display_hsv_img(self):
         """
@@ -112,46 +111,45 @@ class Computer_vision:
             mask = cv2.inRange(self.hsv_image, self.COLOR_BOUNDS[color][0], self.COLOR_BOUNDS[color][1])
         return mask
 
+    def get_mask_stripes(self, divide_width = 10):
+        shape = list(self.bgr_image.shape)[:2]
+        mask = np.ones(shape, np.uint8)
+        print(shape)
+        for c in range(shape[1]//divide_width):
+            column = c*divide_width
+            mask[:, column] = np.zeros(shape[0], np.uint8)
+        return mask
+
+    def get_mask_no_floor(self, height):
+        shape = list(self.bgr_image.shape)[:2]
+        mask_top = np.ones((shape[0] - height, shape[1]), np.uint8)
+        mask_bottom = np.zeros((height, shape[1]), np.uint8)
+        mask = np.concatenate((mask_top,mask_bottom),axis=0)
+        return mask
+
     def update_color_masks(self):
         """
         Creates a new mask for each color in self.COLORS.
         """
         for color in self.COLORS:
             self.color_masks[color] = self.get_color_mask(color)
+        grey_mask = self.color_masks[self.COLORS[0]]
+        for color in self.COLORS[1:]:
+            grey_mask = grey_mask | self.color_masks[color]
+        grey_mask = cv2.bitwise_not(grey_mask)
+        stripes_mask = self.get_mask_stripes(50)
+        no_floor_mask = self.get_mask_no_floor(350)
+        self.color_masks["yellow"] = self.color_masks["yellow"] & stripes_mask
+        self.color_masks["grey"] = grey_mask & stripes_mask & no_floor_mask
 
-    def update_connected_components(self):
-        """
-        Updates the dictionary of connected components for each color.
-        """
-        for color in self.COLORS:
-            mask = self.color_masks[color]
-            components = cv2.connectedComponentsWithStats(mask)
-            filtered_components = []
-            for component in components:
-                if self.min_object_size < component[2][4] < self.max_object_size:
-                    filtered_components.append(component)
-            self.connected_components[color] = filtered_components
 
-    def display_connected_components(self, *colors): #deprecated
-        """
-        Combines connected components into one and displays it.
-        :param colors: A list of colors, where colors are sring names. for example:  "red", "blue", ....
-        """
-        final_mask = self.connected_components[colors[0]][1].astype("uint8")
-        if len(colors) > 1:
-            for color in colors[1:]:
-                final_mask = final_mask | self.connected_components[color][1].astype("uint8")
-        masked_image = cv2.bitwise_and(self.bgr_image, self.bgr_image, mask=final_mask)
-        cv2.imshow("BGR masked by Connected compoments", masked_image)
-        cv2.setMouseCallback('BGR masked by Connected compoments', self._click_data)
-        cv2.waitKey()
 
     def update_contours(self):
         """
         Generates countours and filters them by size.
         Desirable contours are then placed in self.contours according to their color.
         """
-        for color in self.COLORS:
+        for color in self.COLORS + ["grey"]:
             filtered_contours = []
             contours, hierarchy = cv2.findContours(self.color_masks[color], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             for contour in contours:
@@ -176,57 +174,16 @@ class Computer_vision:
         mask = np.zeros(shape, np.float64)
         cv2.drawContours(mask, contour, index, 1, -1)
         indeces = np.nonzero(mask)
-        #print(self.point_cloud[indeces])
         points = np.delete(self.point_cloud[indeces], 1, 1)#remove Y coordinate (irelevant)
         points = points * np.array([-1, 1]) #fliping x coordinate
-        #print(points)
         median = np.nanmedian(points, axis=(0))
         quantile = np.nanquantile(points, 0.3, axis=(0))
-        #mean = np.nanmean(points, axis=(0))
         return quantile
-    def get_color_center_position(self, color):#deprecated
-        #mask = self.get_color_mask(color)
-        mask = self.color_masks[color]
-        out = cv2.connectedComponentsWithStats(mask)
-
-        positions = []
-        #if color == "purple":
-        #    print("out", out[2], out[3])
-        for a in range(len(out[3])):
-            if self.min_object_size < out[2][a][4] < self.max_object_size:
-                positions.append(out[3][a])
-            else:
-                pass
-        #print("positions:", positions)
-        return np.asarray(positions, dtype=np.int16)
-
-    def get_point_cloud_avg_xyz_on_uv(self, uv, sizeU = 4, sizeV = 8):#deprecated
-        u = uv[0]
-        v = uv[1]
-        area_of_interest = self.point_cloud[max(v-sizeV//2, 0):min(v+sizeV//2, self.max_v), max(u-sizeU//2, 0):min(u+sizeU//2, self.max_u)]
-
-        avg = np.nanmedian(area_of_interest, axis=(0, 1))
-        return avg
-
-    def get_list_of_objects_old(self):#deprecated
-        objects = []
-        self.update_color_masks()
-        for color in self.COLORS:
-            uvs = self.get_color_center_position(color)
-            #print(color, uvs)
-            for uv in uvs:
-                position = self.get_point_cloud_avg_xyz_on_uv(uv)
-                position = np.delete(position, 1) * np.array([-1, 1]) #excluding y coordinate and fliping x coordinate
-
-                #print(color, position)
-                if (not np.isnan(position).any()):
-                    objects.append([color, position])
-        return objects
 
     def get_list_of_objects(self):
         objects = []
         self.update_color_masks()
-        for color in self.COLORS:
+        for color in self.COLORS + ["grey"]:
             color_contours = self.contours[color]
             if color_contours != None:
                 for index in range(len(color_contours)):
@@ -235,22 +192,24 @@ class Computer_vision:
         return objects
 
 if __name__ == "__main__":
+
     #np.set_printoptions(threshold=sys.maxsize)
     computer_vision = Computer_vision()
-    cloud = np.load("cloud1.npy", allow_pickle=True)
-    bgr_image = np.load("color1.npy", allow_pickle=True)
+    cloud = np.load("cloud4.npy", allow_pickle=True)
+    bgr_image = np.load("color4.npy", allow_pickle=True)
     computer_vision.update_image(bgr_image, cloud)
     computer_vision.update_color_masks()
     #computer_vision.display_pc_img()
     computer_vision.update_contours()
+    computer_vision.get_mask_stripes()
     #computer_vision.get_position_from_contour(computer_vision.contours["purple"], 0)
-    print(computer_vision.get_list_of_objects_old())
     print(computer_vision.get_list_of_objects())
 
     computer_vision.display_contours("purple", "red", "green", "blue", "yellow")
+    #computer_vision.display_contours("yellow")
     #computer_vision.update_connected_components()
     #computer_vision.display_color_masks("purple", "green", "red", "yellow", "blue")
-
+    computer_vision.display_color_masks("yellow")
 
     #computer_vision.display_connected_components("purple", "green", "red", "yellow", "blue")
 
