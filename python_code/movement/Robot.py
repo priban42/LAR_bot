@@ -35,7 +35,7 @@ class Robot:
         self.ACTIVE = False
     def _button(self, msg):
         """
-        This functions executes after a bumper is pressed. Used to stop any movement.
+        This functions executes after any button is pressed. Used to start bot.
         :param msg: contains information about wich button has been pressed. (unused)
         """
         print("BUMPER PRESSED!")
