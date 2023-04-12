@@ -1,3 +1,5 @@
+import time
+
 from computer_vision.Computer_vision import Computer_vision
 from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
 #from movement.Robot import Robot# to this
@@ -63,8 +65,14 @@ class Skynet:
         path = self.map.find_path()
         self.robot.move_along_path(path[1:steps_to_follow + 1], max_distance)
 
+    def wait_to_start(self):
+        while self.robot.ACTIVE == False:
+            time.sleep(0.1)
+
+
 def main():
     arnold = Skynet()
+    arnold.wait_to_start()
     arnold.reset_map()
     arnold.locate()
     try:

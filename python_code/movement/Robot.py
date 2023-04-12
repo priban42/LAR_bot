@@ -16,7 +16,9 @@ class Robot:
         self._linear_velocity = 0.3  # in meters/sec
         self._linear_acceleration = 0.3
         self.turtle.register_bumper_event_cb(self._bumper)
-        self.ACTIVE = True
+        self.turtle.register_button_event_cb(self._button)
+        self.ACTIVE = False #for activating without button change to True
+
 
         print("robot initialized...")
 
@@ -26,10 +28,18 @@ class Robot:
     def _bumper(self, msg):
         """
         This functions executes after a bumper is pressed. Used to stop any movement.
-        :param msg: contains information about wich button has been pressed. (unused)
+        :param msg: contains information about what button has been pressed. (unused)
         """
         print("BUMPER PRESSED!")
         self.ACTIVE = False
+
+    def _button(self, msg):
+        """
+        This functions executes after any button is pressed. Used to start Bot.
+        :param msg: contains information about what button has been pressed. (unused)
+        """
+        print("button pressed, robot activated")
+        self.ACTIVE = True
 
     def rotate_bot_old(self, angle: float) -> None:  # deg
         """
