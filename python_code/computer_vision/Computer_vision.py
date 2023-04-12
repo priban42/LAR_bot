@@ -115,7 +115,7 @@ class Computer_vision:
         shape = list(self.bgr_image.shape)[:2]
         mask = np.ones(shape, np.uint8)
         print(shape)
-        for c in range(shape[1]//divide_width):
+        for c in range(1, shape[1]//divide_width + 1):
             column = c*divide_width
             mask[:, column] = np.zeros(shape[0], np.uint8)
         return mask

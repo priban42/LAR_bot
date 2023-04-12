@@ -21,9 +21,6 @@ class Skynet:
         self.vizualize.set_map(self.map)
 
     def update_vision(self):
-        """
-        TODO: make it so that it gets the image from camera. preferably implemented in the vlass Computer_vision.
-        """
         point_cloud = np.load("computer_vision/cloud1.npy", allow_pickle=True)
         color_picture = np.load("computer_vision/color1.npy", allow_pickle=True)
         #self.robot.turtle.wait_for_point_cloud()
@@ -32,7 +29,8 @@ class Skynet:
         #color_picture = self.robot.turtle.get_rgb_image()
 
         self.vision.update_image(color_picture, point_cloud)
-        self.vision.display_contours("purple", "red", "green", "blue", "yellow")
+        self.vision.display_contours("purple", "red", "green", "blue", "yellow", "grey")
+        #self.vision.display_contours("grey")
         #arnold.vision.display_pc_img()
 
     def locate(self):
@@ -70,7 +68,7 @@ def main():
     arnold.reset_map()
     arnold.locate()
     try:
-        arnold.vizualize.draw(False)
+        arnold.vizualize.draw(True)
     except:
         pass
     arnold.follow_path(1, 0.5)
