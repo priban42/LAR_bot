@@ -23,6 +23,7 @@ class Map:
         self.point_of_interest = None
         self.path_extension = []
         self.GARAGE_DEPTH = 0.22#in meters
+        self.GARAGE_CLEARANCE = 2#in meters
 
     def find_path_old(self, A, B):
         self.path = find_path(self.graph, A, B).nodes + self.path_extension
@@ -91,7 +92,7 @@ class Map:
         """
         purple_objects = self.get_list_of_objects(whitelist_colors=["purple"])
         if len(purple_objects) == 2:
-            position_a, position_b = purple_objects[0].get_adjecent_points(purple_objects[1], 1)
+            position_a, position_b = purple_objects[0].get_adjecent_points(purple_objects[1], self.GARAGE_CLEARANCE)
             if np.linalg.norm(position_a - self.start_point.position) > np.linalg.norm(position_b - self.start_point.position):
                 closer_adjacent_position = position_b
                 farther_adjacent_position = position_a
@@ -99,11 +100,13 @@ class Map:
                 closer_adjacent_position = position_a
                 farther_adjacent_position = position_b
             self.final_point = self.add_point_from_position(closer_adjacent_position)
+            self.final_point.final = True
             extension_position_vect = (farther_adjacent_position - closer_adjacent_position)
             extension_position = (closer_adjacent_position + farther_adjacent_position)/2 + self.GARAGE_DEPTH*extension_position_vect/np.linalg.norm(extension_position_vect)
             self.path_extension = [self.add_point_from_position(extension_position)]
             return True
         return False
+
     def find_point_of_interest(self):
         """
         A heurestic function meant fo find a point near the final destination.

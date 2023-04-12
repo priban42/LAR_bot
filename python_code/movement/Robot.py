@@ -16,7 +16,10 @@ class Robot:
         self._linear_velocity = 0.3  # in meters/sec
         self._linear_acceleration = 0.3
         self.turtle.register_bumper_event_cb(self._bumper)
-        self.ACTIVE = True
+        self.turtle.register_button_event_cb(self._button)
+
+        self.ACTIVE = False
+        self.beyond_final = False
 
         print("robot initialized...")
 
@@ -30,6 +33,13 @@ class Robot:
         """
         print("BUMPER PRESSED!")
         self.ACTIVE = False
+    def _button(self, msg):
+        """
+        This functions executes after a bumper is pressed. Used to stop any movement.
+        :param msg: contains information about wich button has been pressed. (unused)
+        """
+        print("BUMPER PRESSED!")
+        self.ACTIVE = True
 
     def rotate_bot_old(self, angle: float) -> None:  # deg
         """
@@ -57,10 +67,11 @@ class Robot:
         :param distance: in meters
         """
         #time.sleep(1)
+        fixed_angle = angle + 3#rotational asymetry
         self.turtle.reset_odometry()
         time.sleep(0.5)
-        angle_sign = np.sign(angle)
-        abs_angle = abs(angle)
+        angle_sign = np.sign(fixed_angle)
+        abs_angle = abs(fixed_angle)
 
         if abs_angle > (self._angular_acceleration**2)/self._angular_velocity:
             abs_angle = abs_angle - 4*self._angular_velocity/28.6
@@ -265,10 +276,14 @@ class Robot:
             distance = np.linalg.norm(self.position - point.position)
             if max_distance > distance_traveled + distance:
                 self.move_to_position(point.position)
+                if point.final and not self.beyond_final:
+                    self.beyond_final = True
+                    return True
             else:
                 norm_vect = (point.position - self.position)/np.linalg.norm(point.position - self.position)
                 new_position = self.position + (max_distance - distance_traveled) * norm_vect
                 self.move_to_position(new_position)
+        return False
 
     if __name__ == "__main__":
         pass
