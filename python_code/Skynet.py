@@ -75,8 +75,6 @@ class Skynet:
 
 
     def locate(self):
-        self.add_visible_objects_to_map()
-
         point = self.map.add_point_from_position(self.robot.position)
         self.map.start_point = point
 
@@ -109,12 +107,14 @@ def main():
     arnold = Skynet()
     arnold.wait_to_start()
     arnold.discover()
+    arnold.reset_map()
+    arnold.add_visible_objects_to_map()
+    arnold.locate()
     for a in range(10):
-        arnold.reset_map()
-        arnold.locate()
         if arnold.map.quality > 3:
             arnold.discover()
             arnold.reset_map()
+            arnold.add_visible_objects_to_map()
             arnold.locate()
         try:
             arnold.vizualize.draw(True)
@@ -127,7 +127,10 @@ def main():
             return
         else:
             arnold.follow_path(1, 0.5)
+            arnold.add_visible_objects_to_map()
             arnold.robot.look_at_position(arnold.map.point_of_interest.position)
+            arnold.add_visible_objects_to_map()
+            arnold.locate()
 
 if __name__ == "__main__":
     main()

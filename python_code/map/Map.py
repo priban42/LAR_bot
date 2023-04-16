@@ -13,8 +13,8 @@ class Map:
     def __init__(self):
         #self.objects = set() # every object is unique. This set is only accessed direcly from self.add_object().
         self.objects = {"red": dict(), "blue": dict(), "green": dict(), "purple": dict(), "yellow": dict(), "grey": dict()}
-        self.points = dict() # every point is unique. This set is only accessed direcly from self.add_point().
-        self.line_segments = set() # every point is unique. This set is only accessed direcly from self.add_line_segment().
+        self.points = dict()  # every point is unique. This set is only accessed direcly from self.add_point().
+        self.line_segments = set()  # every point is unique. This set is only accessed direcly from self.add_line_segment().
         self.path = []
         self.centre = [450, 250]  # offset pro vizualizaci (posule levy horni roh do stredu)
         self.graph = Graph()
@@ -23,8 +23,8 @@ class Map:
         self.point_of_interest = None
         self.quality = 10  # based on how the value of objects detected. the lower the better.
         self.path_extension = []
-        self.GARAGE_DEPTH = 0.22#in meters
-        self.GARAGE_CLEARANCE = 2#in meters
+        self.GARAGE_DEPTH = 0.22  # in meters
+        self.GARAGE_CLEARANCE = 2  # in meters
         self.robot = None
 
     def find_path_old(self, A, B):
