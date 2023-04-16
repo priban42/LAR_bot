@@ -21,9 +21,11 @@ class Map:
         self.start_point = None
         self.final_point = None
         self.point_of_interest = None
+        self.quality = 10  # based on how the value of objects detected. the lower the better.
         self.path_extension = []
         self.GARAGE_DEPTH = 0.22#in meters
         self.GARAGE_CLEARANCE = 2#in meters
+        self.robot = None
 
     def find_path_old(self, A, B):
         self.path = find_path(self.graph, A, B).nodes + self.path_extension
@@ -32,11 +34,16 @@ class Map:
     def find_path(self):
         try:
             self.path = find_path(self.graph, self.start_point, self.final_point).nodes + self.path_extension
+            return True
         except:
-            print("path not found!")
-            self.path = []
-        return self.path
+            return False
 
+    def path_exists(self, point):
+        try:
+            self.path = find_path(self.graph, self.start_point, point).nodes
+            return True
+        except:
+            return False
     def add_object_from_position(self, x, y, r, color):
         new_object = Object()
         new_object.set_position(x, y)
@@ -117,24 +124,41 @@ class Map:
         if len(purple_objects) == 2:
             self.point_of_interest = self.add_point_from_position((purple_objects[0].position + purple_objects[1].position)/2) # centre of gate
             self.point_of_interest.color = "purple"
+            self.quality = 1
+        elif len(purple_objects) == 1:
+            self.point_of_interest = self.add_point_from_position(purple_objects[0].position) # centre of gate
+            self.point_of_interest.color = "purple"
+            self.quality = 2
         elif len(yellow_objects) > 0:
             position_sum = np.array([0, 0])
             for object in yellow_objects:
                 position_sum += object.position
             self.point_of_interest = self.add_point_from_position(position_sum/len(yellow_objects))  # avg yellow position
             self.point_of_interest.color = "yellow"
+            self.quality = 3
         elif len(color_objects) > 0:
             position_sum = np.array([0, 0])
             for object in color_objects:
                 position_sum += object.position
             self.point_of_interest = self.add_point_from_position(position_sum/len(color_objects))  # avg yellow position
             self.point_of_interest.color = "cyan2"
+            self.quality = 4
         else:
             self.point_of_interest = np.array([random.randint(-100  + self.start_point[0], 100  + self.start_point[0]),
                                                random.randint(-100  + self.start_point[1], 100  + self.start_point[1])])
             self.point_of_interest.color = "gray26"
+            self.quality = 5
             print("random point of interest added")
 
+    def get_sorted_points(self):
+        """
+        this function returns a list of points sorted by distance from the point of interest
+        """
+        list_of_points = list(self.points.values())
+        print(list_of_points)
+        list_of_points.sort(key=lambda x: np.linalg.norm(x.position - self.point_of_interest.position))
+        print(list_of_points)
+        return list_of_points
 
     def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
         """

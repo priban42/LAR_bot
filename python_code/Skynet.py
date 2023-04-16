@@ -12,15 +12,16 @@ import cv2
 class Skynet:
     def __init__(self):
         self.robot = Robot()
-        self.map = Map()
         self.vision = Computer_vision()
         self.vizualize = Vizualize()
-        self.vizualize.set_map(self.map)
+        self.map = None
+        self.reset_map()
         self.vizualize.set_robot(self.robot)
         self.beyond_final_point = False
 
     def reset_map(self):
         self.map = Map()
+        self.map.robot = self.robot
         self.vizualize.set_map(self.map)
 
     def update_vision(self):
@@ -32,33 +33,64 @@ class Skynet:
         #color_picture = self.robot.turtle.get_rgb_image()
 
         self.vision.update_image(color_picture, point_cloud)
-        self.vision.display_contours("purple", "red", "green", "blue", "yellow", "grey")
+        #self.vision.display_contours("purple", "red", "green", "blue", "yellow", "grey")
         #self.vision.display_contours("grey")
         #arnold.vision.display_pc_img()
 
-    def locate(self):
+    def add_visible_objects_to_map(self):
         self.update_vision()
         objects = self.vision.get_list_of_objects()
         for object in objects:
             color = object[0]
             relative_position = object[1]
             absolute_position = self.robot.relative_to_absolute_position(relative_position)
-            if color == "purple":
+            if color == "purple" and len(self.map.objects[color]) < 2:
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.2, color=color)
             elif color == "yellow":
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.15, color=color)
             elif color == "grey":
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.25, color=color)
-            else:
+            elif len(self.map.objects[color]) < 1:
                 self.map.add_object_from_position(absolute_position[0], absolute_position[1], 0.35, color=color)
+
+    def discover(self):
+        """
+        Rotates the robot to find the best angle to rotate to.
+        :return: none
+        """
+        best_angle = 0
+        best_quality = 10
+        increments = 30
+        for a in range(360//increments + 1):
+            self.reset_map()
+            self.add_visible_objects_to_map()
+            self.map.find_point_of_interest()
+            if self.map.quality < best_quality:
+                best_angle = a*increments
+                best_quality = self.map.quality
+            if best_quality == 1:
+                return
+            self.robot.rotate_bot(increments)
+        self.robot.rotate_bot(360%increments + best_angle)
+
+
+    def locate(self):
+        self.add_visible_objects_to_map()
+
         point = self.map.add_point_from_position(self.robot.position)
         self.map.start_point = point
 
         self.map.add_points_from_objects()
         self.map.add_points_in_grid(self.robot.position)
         self.map.add_all_possible_line_segments()
-        self.map.find_path()
         self.map.find_point_of_interest()
+        if self.map.quality == 1 and self.map.find_path():
+            pass
+        else:
+            sorted_points = self.map.get_sorted_points()
+            for p in sorted_points[1:]:
+                if self.map.path_exists(p):
+                    break
 
 
     def follow_path(self, steps_to_follow, max_distance, ending = False):
@@ -76,11 +108,16 @@ class Skynet:
 def main():
     arnold = Skynet()
     arnold.wait_to_start()
+    arnold.discover()
     for a in range(10):
         arnold.reset_map()
         arnold.locate()
+        if arnold.map.quality > 3:
+            arnold.discover()
+            arnold.reset_map()
+            arnold.locate()
         try:
-            arnold.vizualize.draw(False)
+            arnold.vizualize.draw(True)
         except:
             pass
         if arnold.beyond_final_point:

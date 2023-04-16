@@ -12,7 +12,12 @@ class Point(Entity):
     def __eq__(self, other: 'Point') -> bool:
         comparison = self.position == other.position
         return comparison.all()
+
     def __str__(self):
         return  f'[Point: {self.color}, [{self.position[0]:.2f}, {self.position[1]:.2f}]]'
+
+    def __repr__(self):
+        return str(self)
+
     def __hash__(self):
         return hash((self.position[0], self.position[1]))

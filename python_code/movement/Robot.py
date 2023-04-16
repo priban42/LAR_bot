@@ -38,7 +38,7 @@ class Robot:
         This functions executes after any button is pressed. Used to start bot.
         :param msg: contains information about wich button has been pressed. (unused)
         """
-        print("BUMPER PRESSED!")
+        print("ACTIVATION BUTTON PRESSED!")
         self.ACTIVE = True
 
     def rotate_bot_old(self, angle: float) -> None:  # deg
@@ -64,7 +64,7 @@ class Robot:
     def rotate_bot(self, angle: float) -> None:
         """
         Physically moves the turtle bot a certain distance. Might not be very accurate.
-        :param distance: in meters
+        :param angle: in degrees
         """
         #time.sleep(1)
         fixed_angle = angle + 3#rotational asymetry
