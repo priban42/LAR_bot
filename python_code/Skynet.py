@@ -1,8 +1,8 @@
 import time
 
 from computer_vision.Computer_vision import Computer_vision
-from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
-#from movement.Robot import Robot# to this
+#from movement.Test_Robot import Robot# Change before runnign on turtle bot!!!!!!!!!
+from movement.Robot import Robot# to this
 from map.Vizualize import Vizualize
 from map import Map
 import os
@@ -25,15 +25,15 @@ class Skynet:
         self.vizualize.set_map(self.map)
 
     def update_vision(self):
-        point_cloud = np.load("computer_vision/cloud1.npy", allow_pickle=True)
-        color_picture = np.load("computer_vision/color1.npy", allow_pickle=True)
-        #self.robot.turtle.wait_for_point_cloud()
-        #point_cloud = self.robot.turtle.get_point_cloud()
-        #self.robot.turtle.wait_for_rgb_image()
-        #color_picture = self.robot.turtle.get_rgb_image()
+        #point_cloud = np.load("computer_vision/cloud1.npy", allow_pickle=True)
+        #color_picture = np.load("computer_vision/color1.npy", allow_pickle=True)
+        self.robot.turtle.wait_for_point_cloud()
+        point_cloud = self.robot.turtle.get_point_cloud()
+        self.robot.turtle.wait_for_rgb_image()
+        color_picture = self.robot.turtle.get_rgb_image()
 
         self.vision.update_image(color_picture, point_cloud)
-        #self.vision.display_contours("purple", "red", "green", "blue", "yellow", "grey")
+        #   self.vision.display_contours("purple", "red", "green", "blue", "yellow", "grey")
         #self.vision.display_contours("grey")
         #arnold.vision.display_pc_img()
 
@@ -58,6 +58,7 @@ class Skynet:
         Rotates the robot to find the best angle to rotate to.
         :return: none
         """
+        print("DISCOVER BEGAN")
         best_angle = 0
         best_quality = 10
         increments = 30
@@ -65,13 +66,17 @@ class Skynet:
             self.reset_map()
             self.add_visible_objects_to_map()
             self.map.find_point_of_interest()
+            print("MAP QUALITY:", self.map.quality)
             if self.map.quality < best_quality:
                 best_angle = a*increments
                 best_quality = self.map.quality
-            if best_quality == 1:
+            if best_quality == 1 or best_quality == 3:
+                print("DISCOVER RETURNED")
                 return
             self.robot.rotate_bot(increments)
+            #self.robot.move_bot(0.1)
         self.robot.rotate_bot(360%increments + best_angle)
+        print("DISCOVER ENDED")
 
 
     def locate(self):
@@ -92,7 +97,8 @@ class Skynet:
 
 
     def follow_path(self, steps_to_follow, max_distance, ending = False):
-        path = self.map.find_path()
+        self.map.find_path()
+        path = self.map.path
         print(min(steps_to_follow + 1, len(path)))
         if ending:
             self.beyond_final_point = self.robot.move_along_path(path[2:3], max_distance)
@@ -106,31 +112,50 @@ class Skynet:
 def main():
     arnold = Skynet()
     arnold.wait_to_start()
-    arnold.discover()
+    #arnold.robot.ACTIVE = True#remove after testing
+    #arnold.discover()
     arnold.reset_map()
     arnold.add_visible_objects_to_map()
     arnold.locate()
-    for a in range(10):
+    for a in range(100):
+        if not arnold.robot.ACTIVE:
+            return
+        arnold.reset_map()
+        arnold.add_visible_objects_to_map()
+        arnold.locate()
+        print("MAP QUALITY_:", arnold.map.quality)
         if arnold.map.quality > 3:
             arnold.discover()
             arnold.reset_map()
             arnold.add_visible_objects_to_map()
             arnold.locate()
         try:
-            arnold.vizualize.draw(True)
+            arnold.vizualize.draw(False)
         except:
             pass
         if arnold.beyond_final_point:
             print("FINAL PART")
             print(arnold.map.find_path())
             arnold.follow_path(5, 10, True)
+
+            print("we have reached the Loire")
+            arnold.robot.turtle.play_sound(6)
             return
         else:
-            arnold.follow_path(1, 0.5)
+            arnold.follow_path(4, 1)
             arnold.add_visible_objects_to_map()
             arnold.robot.look_at_position(arnold.map.point_of_interest.position)
             arnold.add_visible_objects_to_map()
             arnold.locate()
 
+
 if __name__ == "__main__":
     main()
+
+"""
+ssh -X pribavoj@turtle11
+singularity shell /local/robolab_noetic_2022-03-31.simg
+source /opt/ros/lar/setup.bash
+
+python3 /home.nfs/pribavoj/PycharmProjects/LAR_bot/python_code/Skynet.py
+"""

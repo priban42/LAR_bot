@@ -126,26 +126,35 @@ class Map:
             self.point_of_interest.color = "purple"
             self.quality = 1
         elif len(purple_objects) == 1:
-            self.point_of_interest = self.add_point_from_position(purple_objects[0].position) # centre of gate
+            position = purple_objects[0].position / len(yellow_objects)
+            vect = (position - self.robot.position)
+            vect = vect / np.linalg.norm(vect)
+            vect_right = np.array([-vect[1], vect[0]])
+            self.point_of_interest = self.add_point_from_position(self.robot.position - vect*0.4 + vect_right*0.2) # centre of gate
+            self.point_of_interest = self.add_point_from_position(purple_objects[0].position)  # centre of gate
             self.point_of_interest.color = "purple"
             self.quality = 2
         elif len(yellow_objects) > 0:
-            position_sum = np.array([0, 0])
+            position_sum = np.array([0, 0], dtype='float64')
             for object in yellow_objects:
                 position_sum += object.position
-            self.point_of_interest = self.add_point_from_position(position_sum/len(yellow_objects))  # avg yellow position
+            position = position_sum/len(yellow_objects)
+            vect = (position - self.robot.position)
+            vect = vect/np.linalg.norm(vect)
+            vect_right = np.array([-vect[1], vect[0]])
+            print(vect, vect_right)
+            self.point_of_interest = self.add_point_from_position(position + 1.0*vect_right + vect*0.5)  # avg yellow position
             self.point_of_interest.color = "yellow"
             self.quality = 3
         elif len(color_objects) > 0:
-            position_sum = np.array([0, 0])
+            position_sum = np.array([0, 0], dtype='float64')
             for object in color_objects:
                 position_sum += object.position
             self.point_of_interest = self.add_point_from_position(position_sum/len(color_objects))  # avg yellow position
             self.point_of_interest.color = "cyan2"
             self.quality = 4
         else:
-            self.point_of_interest = np.array([random.randint(-100  + self.start_point[0], 100  + self.start_point[0]),
-                                               random.randint(-100  + self.start_point[1], 100  + self.start_point[1])])
+            self.point_of_interest = self.add_point_from_position(np.array([random.randint(-100, 100), random.randint(-100, 100)], dtype='float64'))
             self.point_of_interest.color = "gray26"
             self.quality = 5
             print("random point of interest added")
