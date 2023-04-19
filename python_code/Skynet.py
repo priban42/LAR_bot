@@ -132,5 +132,8 @@ def main():
             arnold.add_visible_objects_to_map()
             arnold.locate()
 
+    print("we have reached the Loire")
+    arnold.robot.turtle.play_sound(6)
+
 if __name__ == "__main__":
     main()
