@@ -155,10 +155,10 @@ class Graph(MutableMapping):
             neighbors = {}
 
         if directed or u not in data:
-            # For a directed graph, add u if it's not present or replace
+            # For a directed graph, add ``u`` if it's not present or replace
             # it completely if is.
             #
-            # For an undirected graph, add u if it's not present. If it
+            # For an undirected graph, add ``u`` if it's not present. If it
             # is, add new neighbors and update existing neighbors, but
             # leave other neighbors alone.
             data[u] = {}
@@ -282,7 +282,7 @@ class Graph(MutableMapping):
         Marshalling is quite a bit faster than pickling, but only the
         following types are supported: booleans, integers, long
         integers, floating point numbers, complex numbers, strings,
-        Unicode objects, tuples, lists, sets, frozensets, dictionaries,
+        Unicode objects, tuples, lists, sets, frozen-sets, dictionaries,
         and python_code objects.
 
         """

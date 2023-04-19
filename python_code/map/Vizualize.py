@@ -10,7 +10,7 @@ import random
 import sys
 
 
-class Vizualize():
+class Vizualize:
     def __init__(self):
         self._window = tk.Tk()
         self.width = 600
@@ -32,7 +32,7 @@ class Vizualize():
         self.robot = robot
 
     def _center_view(self):
-        if self.robot != None:
+        if self.robot is not None:
             self.centre = [self.width / 2 + self.robot.position[1] * self.scale,
                            self.height / 2 + self.robot.position[0] * self.scale]
         else:
@@ -41,8 +41,7 @@ class Vizualize():
     def _draw_object(self, object: Object) -> None:
         """
         draws the object on canvas as a circle with a centre
-        :param canvas: tkinter canvas
-        :param object:
+        :param object: what object you want to draw
         """
         self._center_view()
         self.canvas.create_oval(object.position[0] * self.scale + self.centre[0] - object.radius * self.scale,
@@ -50,13 +49,13 @@ class Vizualize():
                                 object.position[0] * self.scale + self.centre[0] + object.radius * self.scale,
                                 object.position[1] * self.scale + self.centre[1] + object.radius * self.scale,
                                 outline=object.color, width=3)
-        #self.canvas.create_oval(object.position[0] * self.scale + self.centre[0] - 3,
+        #                        self.canvas.create_oval(object.position[0] * self.scale + self.centre[0] - 3,
         #                        object.position[1] * self.scale + self.centre[1] - 3,
         #                        object.position[0] * self.scale + self.centre[0] + 3,
         #                        object.position[1] * self.scale + self.centre[1] + 3, fill=object.color)
 
     def _draw_robot(self, robot):
-        if robot == None:
+        if robot is None:
             return
         self._center_view()
         size = 0.2
@@ -73,7 +72,7 @@ class Vizualize():
 
         self.canvas.create_line(line_start_x, line_start_y, line_end_x, line_end_y, fill="green", width=5)
 
-    def _draw_point(self, point, size = 3):
+    def _draw_point(self, point, size=3):
         self._center_view()
         self.canvas.create_oval(point.position[0] * self.scale + self.centre[0] - size,
                                 point.position[1] * self.scale + self.centre[1] - size,
@@ -115,7 +114,7 @@ class Vizualize():
             self.canvas.create_line(0, self.height / 2 - i * self.scale / grid_density, self.width,
                                     self.height / 2 - i * self.scale / grid_density, fill=color)
 
-    def draw(self, draw_path = False):
+    def draw(self, draw_path=False):
         self._draw_grid()
         for object in self.map.get_list_of_objects():
             self._draw_object(object)

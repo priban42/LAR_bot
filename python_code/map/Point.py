@@ -1,6 +1,6 @@
-import numpy as np
+# import numpy as np
 from .Entity import Entity
-import math
+# import math
 
 
 class Point(Entity):
@@ -14,7 +14,7 @@ class Point(Entity):
         return comparison.all()
 
     def __str__(self):
-        return  f'[Point: {self.color}, [{self.position[0]:.2f}, {self.position[1]:.2f}]]'
+        return f'[Point: {self.color}, [{self.position[0]:.2f}, {self.position[1]:.2f}]]'
 
     def __repr__(self):
         return str(self)
