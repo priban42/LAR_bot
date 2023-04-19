@@ -155,9 +155,7 @@ class Map:
         this function returns a list of points sorted by distance from the point of interest
         """
         list_of_points = list(self.points.values())
-        print(list_of_points)
         list_of_points.sort(key=lambda x: np.linalg.norm(x.position - self.point_of_interest.position))
-        print(list_of_points)
         return list_of_points
 
     def add_points_in_grid(self, centre: np.array = np.array([0, 0])) -> None:
