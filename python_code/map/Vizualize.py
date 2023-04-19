@@ -24,6 +24,14 @@ class Vizualize():
         # self._window.mainloop()
         self.map = None
         self.robot = None
+        self.displayed = False
+
+    def reset_window(self):
+        self._window = tk.Tk()
+        self.centre = [self.width / 2, self.height / 2]
+        self._window.geometry(str(self.width) + "x" + str(self.height))
+        self.canvas = tk.Canvas(self._window, width=self.width, height=self.height, bg='light gray')
+        self.canvas.pack()
 
     def set_map(self, map):
         self.map = map
@@ -116,6 +124,8 @@ class Vizualize():
                                     self.height / 2 - i * self.scale / grid_density, fill=color)
 
     def draw(self, draw_path = False):
+        if self.displayed:
+            self.reset_window()
         self._draw_grid()
         for object in self.map.get_list_of_objects():
             self._draw_object(object)
@@ -129,5 +139,7 @@ class Vizualize():
         self._draw_point(self.map.point_of_interest, 5)
         self._draw_robot(self.robot)
 
+        self.displayed = True
         self._window.mainloop()
         self._window.update()
+

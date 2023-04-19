@@ -90,8 +90,8 @@ class Computer_vision:
         if len(colors) > 1:
             for color in colors[1:]:
                 final_mask = final_mask | self.color_masks[color]
-        print(type(final_mask), final_mask.dtype)
-        print(type(self.bgr_image), self.bgr_image.dtype)
+        #print(type(final_mask), final_mask.dtype)
+        #print(type(self.bgr_image), self.bgr_image.dtype)
         masked_image = cv2.bitwise_and(self.bgr_image, self.bgr_image, mask=final_mask)
         cv2.imshow("Masked BGR", masked_image)
         cv2.setMouseCallback('Masked BGR', self._click_data)
@@ -114,7 +114,7 @@ class Computer_vision:
     def get_mask_stripes(self, divide_width = 10):
         shape = list(self.bgr_image.shape)[:2]
         mask = np.ones(shape, np.uint8)
-        print(shape)
+        #print(shape)
         for c in range(1, shape[1]//divide_width + 1):
             column = c*divide_width
             mask[:, column] = np.zeros(shape[0], np.uint8)
@@ -188,6 +188,7 @@ class Computer_vision:
             if color_contours != None:
                 for index in range(len(color_contours)):
                     position = self.get_position_from_contour(color_contours, index)
+                    position += np.array([0.06, 0.0], dtype="float64") #x, y
                     objects.append([color, position])
         return objects
 

@@ -66,10 +66,11 @@ class Robot:
         Physically moves the turtle bot a certain distance. Might not be very accurate.
         :param angle: in degrees
         """
+        print("ROTATION:", angle)
         #time.sleep(1)
-        fixed_angle = angle + 3#rotational asymetry
+        fixed_angle = angle# + 3#rotational asymetry
         self.turtle.reset_odometry()
-        time.sleep(0.5)
+        time.sleep(0.2)
         angle_sign = np.sign(fixed_angle)
         abs_angle = abs(fixed_angle)
 
@@ -136,8 +137,9 @@ class Robot:
         :param distance: in meters
         """
         #time.sleep(1)
+        print("LINEAR MOVEMENT:", dist)
         self.turtle.reset_odometry()
-        time.sleep(0.5)
+        time.sleep(0.2)
         if dist > (self._linear_velocity**2)/self._linear_acceleration:
             distance = dist - 0.05*self._linear_velocity/0.3
         else:

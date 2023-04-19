@@ -5,6 +5,6 @@ rate = Rate(10)
 
 t = get_time()
 
-while get_time() - t < 10:
+while get_time() - t < 2:
     turtle.cmd_velocity(linear=0.1)
     rate.sleep()
