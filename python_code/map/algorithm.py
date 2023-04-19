@@ -45,7 +45,7 @@ def find_path(graph, s, d, annex=None, cost_func=None, heuristic_func=None):
     """Find the shortest path from ``s`` to ``d`` in ``graph``.
 
     This is a wrapper around :func:`single_source_shortest_paths` that
-    extracts path info from the the predecessor list. Look there for a
+    extracts path info from the predecessor list. Look there for a
     description of the args.
 
     Returns
@@ -188,7 +188,7 @@ def single_source_shortest_paths(
             cost_of_s_to_u_plus_cost_of_e = cost_of_s_to_u + cost_of_e
 
             # When there is a heuristic function, we use a
-            # "guess-timated" cost, which is the normal cost plus some
+            # "guesstimated" cost, which is the normal cost plus some
             # other heuristic cost from v to d that is calculated so as
             # to keep us moving in the right direction (generally more
             # toward the goal instead of away from it).

@@ -4,7 +4,6 @@ from .Entity import Entity
 import math
 
 
-
 class Object(Entity):
     def __init__(self, position=np.array([-100, -100]), radius=10):
         Entity.__init__(self, position)
@@ -17,26 +16,27 @@ class Object(Entity):
 
     def __str__(self):
         return f'[Object: {self.color}, [{self.position[0]:.2f}, {self.position[1]:.2f}], {self.radius}]'
+
     def __hash__(self):
         return hash((self.position[0], self.position[1], self.radius))
 
-    def get_adjecent_points(self, object: 'Object', additional_spread=0) -> tuple:
+    def get_adjacent_points(self, object: 'Object', additional_spread=0) -> tuple:
         """
         generates 2 coordinates for points laying in between 2 objects.
-         the points lay on lines tanget to the obejct circle and have the same distance from both centres.
-        :param object:
+         the points lay on lines tangent to the objects circle and have the same distance from both centres.
+        :param object: the other object that the function is comparing with
+        :param additional_spread: moves the adjacent points along the orthogonal axis
         :return:tuple of 2 positions
         """
         vect = (object.position - self.position)/2
         radius = (self.radius + object.radius)/2
-        ortogonal_vect = np.array([-vect[1], vect[0]])
-        ortogonal_vect = ((additional_spread + 1)*radius * ortogonal_vect)/np.linalg.norm(ortogonal_vect)
-        return self.position + vect + ortogonal_vect, self.position + vect - ortogonal_vect
-
+        orthogonal_vect = np.array([-vect[1], vect[0]])
+        orthogonal_vect = ((additional_spread + 1)*radius * orthogonal_vect)/np.linalg.norm(orthogonal_vect)
+        return self.position + vect + orthogonal_vect, self.position + vect - orthogonal_vect
 
     def line_segment_intersects_circle(self, line_segment: Line_segment) -> bool:
         """
-        Calculates weather any point of line_segment lays in the object circle.
+        Calculates whether any point of line_segment lays in an objects circle.
         :param line_segment:
         :return:
         """
