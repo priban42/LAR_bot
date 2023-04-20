@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
-import sys
-import time
+
 
 class Computer_vision:
     COLORS = ["blue", "green", "yellow", "purple", "red"]
@@ -93,7 +92,8 @@ class Computer_vision:
         #print(type(final_mask), final_mask.dtype)
         #print(type(self.bgr_image), self.bgr_image.dtype)
         masked_image = cv2.bitwise_and(self.bgr_image, self.bgr_image, mask=final_mask)
-        cv2.imshow("Masked BGR", masked_image)
+        cv2.imshow("Masked BGR", final_mask)
+        #cv2.imshow("Masked BGR", masked_image)
         cv2.setMouseCallback('Masked BGR', self._click_data)
         cv2.waitKey()
 
@@ -196,17 +196,20 @@ if __name__ == "__main__":
 
     #np.set_printoptions(threshold=sys.maxsize)
     computer_vision = Computer_vision()
-    cloud = np.load("cloud4.npy", allow_pickle=True)
-    bgr_image = np.load("color4.npy", allow_pickle=True)
+    cloud = np.load("cloud1.npy", allow_pickle=True)
+    bgr_image = np.load("color1.npy", allow_pickle=True)
     computer_vision.update_image(bgr_image, cloud)
     computer_vision.update_color_masks()
     #computer_vision.display_pc_img()
     computer_vision.update_contours()
-    computer_vision.get_mask_stripes()
+    #computer_vision.display_color_masks("red")
+    computer_vision.display_contours()
+    #computer_vision.display_bgr_image()
+    #computer_vision.get_mask_stripes()
     #computer_vision.get_position_from_contour(computer_vision.contours["purple"], 0)
     print(computer_vision.get_list_of_objects())
 
-    computer_vision.display_contours("purple", "red", "green", "blue", "yellow")
+    #computer_vision.display_contours("purple", "red", "green", "blue", "yellow")
     #computer_vision.display_contours("yellow")
     #computer_vision.update_connected_components()
     #computer_vision.display_color_masks("purple", "green", "red", "yellow", "blue")

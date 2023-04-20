@@ -83,10 +83,9 @@ class Map:
         (makes 2 points for each par of objects in between)
         """
         list_of_objects = self.get_list_of_objects(whitelist_colors=["red", "green", "blue"])
-
         for a in range(len(list_of_objects)):
             for b in range(a + 1, len(list_of_objects)):
-                position_a, position_b = list_of_objects[a].get_adjecent_points(list_of_objects[b])
+                position_a, position_b = list_of_objects[a].get_adjacent_points(list_of_objects[b])
                 pa = self.add_point_from_position(position_a)
                 pb = self.add_point_from_position(position_b)
         self.find_purple_gate()
@@ -99,7 +98,7 @@ class Map:
         """
         purple_objects = self.get_list_of_objects(whitelist_colors=["purple"])
         if len(purple_objects) == 2:
-            position_a, position_b = purple_objects[0].get_adjecent_points(purple_objects[1], self.GARAGE_CLEARANCE)
+            position_a, position_b = purple_objects[0].get_adjacent_points(purple_objects[1], self.GARAGE_CLEARANCE)
             if np.linalg.norm(position_a - self.start_point.position) > np.linalg.norm(position_b - self.start_point.position):
                 closer_adjacent_position = position_b
                 farther_adjacent_position = position_a
